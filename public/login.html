@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+
+<body style="background:#0d0d0d; color:white; text-align:center; padding:40px;">
+
+<h1>Login</h1>
+
+<input id="email" placeholder="email" />
+<br><br>
+
+<input id="password" type="password" placeholder="password" />
+<br><br>
+
+<button onclick="signin()">Login</button>
+
+<script type="module">
+import { login, supabase } from "./auth.js";
+
+window.signin = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await login(email, password);
+
+  if (error) {
+    alert(error.message);
+  } else {
+    window.location.replace("/dashboard.html");
+  }
+};
+
+// auto redirect if already logged in
+const { data: { session } } = await supabase.auth.getSession();
+
+if (session) {
+  window.location.replace("/dashboard.html");
+}
+</script>
+
+</body>
+</html>

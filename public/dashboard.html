@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShortForge AI</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #1e3a8a 0%, transparent 30%),
+        radial-gradient(circle at top right, #7c3aed 0%, transparent 30%),
+        #020617;
+      color: white;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 1100px; margin: auto; }
+
+    .header { text-align: center; margin-bottom: 40px; }
+
+    .header h1 {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 10px;
+    }
+
+    .header p { color: #94a3b8; font-size: 18px; }
+
+    .card {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+    }
+
+    .topbar {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      color: white;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input { flex: 1; min-width: 280px; }
+    select { min-width: 200px; }
+
+    input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      color: white;
+    }
+
+    button:hover { transform: translateY(-2px); }
+
+    .primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .secondary { background: #1e293b; }
+    .viral { background: linear-gradient(135deg, #f97316, #ef4444); }
+    .logout { background: linear-gradient(135deg, #475569, #334155); }
+
+    h2 {
+      margin-bottom: 18px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .output-box {
+      background: #020617;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px;
+      min-height: 180px;
+      padding: 24px;
+      line-height: 1.7;
+      font-size: 15px;
+      color: #e2e8f0;
+      overflow-wrap: break-word;
+    }
+
+    .saved-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .saved-script {
+      background: #020617;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 18px;
+      line-height: 1.6;
+    }
+
+    .saved-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    .copy-btn {
+      background: #1e293b;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #64748b;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #111827;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      z-index: 9999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .header h1 { font-size: 44px; }
+      .topbar { flex-direction: column; }
+      input, select { width: 100%; }
+      .button-row { width: 100%; }
+      button { flex: 1; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>🚀 ShortForge AI</h1>
+      <p>Create viral TikTok & Shorts scripts instantly</p>
+    </div>
+
+    <div class="card">
+      <div class="topbar">
+        <input id="topic" placeholder="Enter a viral video idea..." />
+
+        <select id="mode">
+          <option value="viral">🔥 Viral</option>
+          <option value="fitness">💪 Fitness</option>
+        </select>
+      </div>
+
+      <div class="button-row">
+        <button class="primary" onclick="generate()">Generate</button>
+        <button class="secondary" onclick="copyScript()">Copy</button>
+        <button class="secondary" onclick="saveScript()">Save</button>
+        <button class="viral" onclick="improveScript()">Make More Viral 🔥</button>
+        <button class="logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Generated Script</h2>
+      <div id="output" class="output-box">Your viral script will appear here...</div>
+    </div>
+
+    <div class="card">
+      <h2>Saved Scripts</h2>
+      <div id="saved" class="saved-container"></div>
+    </div>
+
+    <div class="footer-note">
+      ShortForge AI • Viral Content Engine
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
