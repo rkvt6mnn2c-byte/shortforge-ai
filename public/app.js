@@ -494,19 +494,39 @@ window.toggleTheme = () => {
 
   showToast(`Theme changed to ${currentTheme}`);
 };
-window.showUpgradeMessage = () => {
+window.showUpgradeMessage = async () => {
 
-  const wantsUpgrade = confirm(
-    "Upgrade to ShortForge Pro?\n\nIncludes:\n- Unlimited generations\n- Premium AI tools\n- Future creator features\n\nPress OK to activate demo Pro mode."
-  );
+  try {
+    showToast("Opening Stripe checkout...");
 
-  if (!wantsUpgrade) return;
+    const res = await fetch("/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
 
-  localStorage.setItem("sf_pro", "true");
+    const data = await res.json();
 
-  updateUsageUI();
+    if (!res.ok || !data.url) {
+      throw new Error(data.error || "Checkout failed");
+    }
 
-  showToast("🚀 Pro Mode Activated");
+    window.location.href = data.url;
+
+  } catch (error) {
+    console.error(error);
+
+    const wantsDemo = confirm(
+      "Stripe checkout is not fully connected yet.\n\nUse demo Pro mode for testing?"
+    );
+
+    if (!wantsDemo) return;
+
+    localStorage.setItem("sf_pro", "true");
+    updateUsageUI();
+    showToast("🚀 Demo Pro Mode Activated");
+  }
 };
 
 window.usePromptPreset = (presetName) => {
@@ -1446,6 +1466,20 @@ window.logout = () => {
 };
 
 window.addEventListener("load", () => {
+    const params = new URLSearchParams(window.location.search);
+
+if (params.get("pro") === "true") {
+
+  localStorage.setItem("sf_pro", "true");
+
+  showToast("🚀 Pro Activated!");
+
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+}
   applyTheme();
     ensureDefaultWorkspace();
   renderWorkspaces();

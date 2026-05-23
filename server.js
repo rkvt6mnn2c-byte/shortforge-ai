@@ -4,6 +4,9 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const OpenAI = require("openai");
+const Stripe = require("stripe");
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -710,6 +713,56 @@ Make it natural, high-retention, dramatic when needed, and ready for TikTok, You
     res.status(500).json({
       success: false,
       error: "Voiceover script failed"
+    });
+  }
+});
+app.post("/create-checkout-session", async (req, res) => {
+  try {
+
+    const session = await stripe.checkout.sessions.create({
+
+      payment_method_types: ["card"],
+
+      mode: "subscription",
+
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+
+            product_data: {
+              name: "ShortForge AI Pro"
+            },
+
+            unit_amount: 1900,
+
+            recurring: {
+              interval: "month"
+            }
+          },
+
+          quantity: 1
+        }
+      ],
+
+      success_url:
+        `${req.headers.origin}/dashboard.html?pro=true`,
+
+      cancel_url:
+        `${req.headers.origin}/pricing.html`
+
+    });
+
+    res.json({
+      url: session.url
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Stripe checkout failed"
     });
   }
 });
