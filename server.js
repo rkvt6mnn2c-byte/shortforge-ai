@@ -10,12 +10,47 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+const requestCounts = new Map();
 
+function rateLimit(req, res, next) {
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.socket.remoteAddress ||
+    "unknown";
+
+  const now = Date.now();
+  const windowMs = 60 * 1000;
+  const maxRequests = 20;
+
+  const current = requestCounts.get(ip) || {
+    count: 0,
+    startTime: now
+  };
+
+  if (now - current.startTime > windowMs) {
+    current.count = 0;
+    current.startTime = now;
+  }
+
+  current.count += 1;
+  requestCounts.set(ip, current);
+
+  if (current.count > maxRequests) {
+    return res.status(429).json({
+      error: "Too many requests. Please wait a minute and try again."
+    });
+  }
+
+  next();
+}
+
+app.use(rateLimit);
 // THIS FIXES Cannot GET /dashboard.html
 app.use(express.static(path.join(__dirname, "public")));
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
+
 });
 
 async function runPrompt(systemPrompt, userPrompt) {
