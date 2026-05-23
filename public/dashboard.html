@@ -6,186 +6,797 @@
   <title>ShortForge AI</title>
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: Inter, Arial, sans-serif;
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Inter,Arial,sans-serif;
+
       background:
-        radial-gradient(circle at top left, #1e3a8a 0%, transparent 30%),
-        radial-gradient(circle at top right, #7c3aed 0%, transparent 30%),
+        radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
+        radial-gradient(circle at top right,#7c3aed 0%,transparent 30%),
         #020617;
-      color: white;
-      min-height: 100vh;
-      padding: 40px 20px;
+
+      color:white;
+      min-height:100vh;
+      padding:40px 20px;
     }
 
-    .container { max-width: 1100px; margin: auto; }
-
-    .header { text-align: center; margin-bottom: 40px; }
-
-    .header h1 {
-      font-size: 64px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      margin-bottom: 10px;
+    .container{
+      max-width:1400px;
+      margin:auto;
     }
 
-    .header p { color: #94a3b8; font-size: 18px; }
-
-    .card {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-      border-radius: 24px;
-      padding: 28px;
-      margin-bottom: 28px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+    .header{
+      text-align:center;
+      margin-bottom:40px;
     }
 
-    .topbar {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      flex-wrap: wrap;
+    .header h1{
+      font-size:64px;
+      font-weight:800;
+      letter-spacing:-2px;
+      margin-bottom:10px;
     }
 
-    input, select {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      color: white;
-      padding: 16px;
-      border-radius: 14px;
-      font-size: 16px;
-      outline: none;
+    .header p{
+      color:#94a3b8;
+      font-size:18px;
     }
 
-    input { flex: 1; min-width: 280px; }
-    select { min-width: 200px; }
+    .card{
+      background:rgba(15,23,42,0.75);
 
-    input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      backdrop-filter:blur(12px);
+
+      border-radius:24px;
+
+      padding:28px;
+
+      margin-bottom:28px;
+
+      box-shadow:
+        0 10px 40px rgba(0,0,0,0.45);
     }
 
-    .button-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 18px;
+    .usage-card,
+    .topbar,
+    .filter-row,
+    .workspace-row{
+
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
     }
 
-    button {
-      border: none;
-      border-radius: 14px;
-      padding: 14px 18px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      color: white;
+    .button-row,
+    .preset-grid{
+
+      display:grid;
+
+      grid-template-columns:
+        repeat(auto-fit,minmax(180px,1fr));
+
+      gap:12px;
+
+      margin-top:18px;
     }
 
-    button:hover { transform: translateY(-2px); }
+    .button-row button,
+    .preset-grid button{
+      width:100%;
+    }
+.button-row .section-title{
+  grid-column:1 / -1;
+  margin-top:18px;
+  margin-bottom:0;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,0.08);
+  font-size:15px;
+  letter-spacing:0.08em;
+  color:#93c5fd;
+}
+    .template-grid{
 
-    .primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-    .secondary { background: #1e293b; }
-    .viral { background: linear-gradient(135deg, #f97316, #ef4444); }
-    .logout { background: linear-gradient(135deg, #475569, #334155); }
+      display:grid;
 
-    h2 {
-      margin-bottom: 18px;
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -1px;
+      grid-template-columns:
+        repeat(auto-fit,minmax(260px,1fr));
+
+      gap:16px;
+
+      margin-top:18px;
     }
 
-    .output-box {
-      background: #020617;
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 18px;
-      min-height: 180px;
-      padding: 24px;
-      line-height: 1.7;
-      font-size: 15px;
-      color: #e2e8f0;
-      overflow-wrap: break-word;
+    .usage-card{
+
+      justify-content:space-between;
+
+      background:
+        rgba(2,6,23,0.8);
+
+      border-radius:18px;
+
+      padding:18px;
+
+      margin-bottom:18px;
     }
 
-    .saved-container {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .usage-title{
+      font-weight:800;
+      font-size:16px;
     }
 
-    .saved-script {
-      background: #020617;
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 16px;
-      padding: 18px;
-      line-height: 1.6;
+    .usage-sub,
+    .small-note,
+    .filter-title,
+    .meta{
+
+      color:#94a3b8;
+
+      font-size:14px;
+
+      margin-bottom:8px;
     }
 
-    .saved-actions {
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .usage-badge{
+
+      background:
+        linear-gradient(135deg,#22c55e,#16a34a);
+
+      padding:10px 14px;
+
+      border-radius:999px;
+
+      font-weight:800;
+      font-size:14px;
     }
 
-    .delete-btn {
-      background: #dc2626;
-      padding: 10px 14px;
-      font-size: 13px;
+    input,
+    select{
+
+      background:#0f172a;
+
+      border:
+        1px solid #1e293b;
+
+      color:white;
+
+      padding:16px;
+
+      border-radius:14px;
+
+      font-size:16px;
+
+      outline:none;
     }
 
-    .copy-btn {
-      background: #1e293b;
-      padding: 10px 14px;
-      font-size: 13px;
+    input{
+      flex:1;
+      min-width:260px;
     }
 
-    .meta {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-bottom: 10px;
+    select{
+      min-width:220px;
     }
 
-    .footer-note {
-      text-align: center;
-      color: #64748b;
-      margin-top: 20px;
-      font-size: 13px;
+    input:focus,
+    select:focus{
+
+      border-color:#3b82f6;
+
+      box-shadow:
+        0 0 0 4px rgba(59,130,246,0.15);
     }
 
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #111827;
-      color: white;
-      padding: 14px 20px;
-      border-radius: 12px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.3s ease;
-      pointer-events: none;
-      border: 1px solid rgba(255,255,255,0.08);
-      z-index: 9999;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    button{
+
+      border:none;
+
+      border-radius:14px;
+
+      padding:14px 18px;
+
+      font-size:15px;
+
+      font-weight:700;
+
+      cursor:pointer;
+
+      transition:all 0.18s ease;
+
+      color:white;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
+    button:hover{
+      transform:translateY(-2px);
+    }
+    .preset-grid button{
+  color:#111827;
+}
+
+    .primary{
+      background:
+        linear-gradient(135deg,#3b82f6,#2563eb);
     }
 
-    @media (max-width: 768px) {
-      .header h1 { font-size: 44px; }
-      .topbar { flex-direction: column; }
-      input, select { width: 100%; }
-      .button-row { width: 100%; }
-      button { flex: 1; }
+    .secondary{
+      background:#1e293b;
     }
+
+    .trend{
+      background:
+        linear-gradient(135deg,#14b8a6,#22c55e);
+    }
+
+    .analytics{
+      background:
+        linear-gradient(135deg,#6366f1,#8b5cf6);
+    }
+
+    .thumbnail{
+      background:
+        linear-gradient(135deg,#a855f7,#ec4899);
+    }
+
+    .brand{
+      background:
+        linear-gradient(135deg,#facc15,#f97316);
+
+      color:#111827;
+    }
+
+    .export{
+      background:
+        linear-gradient(135deg,#06b6d4,#2563eb);
+    }
+
+    .download{
+      background:
+        linear-gradient(135deg,#22c55e,#16a34a);
+    }
+
+    .viral{
+      background:
+        linear-gradient(135deg,#f97316,#ef4444);
+    }
+
+    .danger{
+      background:#dc2626;
+    }
+
+    .logout{
+      background:
+        linear-gradient(135deg,#475569,#334155);
+    }
+
+    .upgrade-btn{
+      background:
+        linear-gradient(135deg,#facc15,#f97316);
+
+      color:#111827;
+    }
+
+    h2{
+      margin-bottom:18px;
+      font-size:26px;
+      font-weight:800;
+    }
+
+    h3{
+      font-size:18px;
+      margin-top:22px;
+      margin-bottom:8px;
+      color:#e2e8f0;
+    }
+
+    .output-box{
+
+      background:#020617;
+
+      border:
+        1px solid rgba(255,255,255,0.05);
+
+      border-radius:18px;
+
+      min-height:180px;
+
+      padding:24px;
+
+      line-height:1.7;
+
+      color:#e2e8f0;
+
+      overflow-wrap:break-word;
+    }
+.viral-score-card{
+
+  background:#0f172a;
+
+  border:
+    1px solid rgba(255,255,255,0.06);
+
+  border-radius:18px;
+
+  padding:20px;
+
+  margin:18px 0;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.35);
+}
+
+.viral-score-top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  margin-bottom:14px;
+
+  font-weight:800;
+
+  font-size:18px;
+}
+
+.viral-score-bar{
+
+  width:100%;
+
+  height:16px;
+
+  background:#1e293b;
+
+  border-radius:999px;
+
+  overflow:hidden;
+
+  margin-bottom:12px;
+}
+
+.viral-score-fill{
+
+  height:100%;
+
+  border-radius:999px;
+
+  transition:width 0.4s ease;
+}
+
+.score-low{
+  background:
+    linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.score-mid{
+  background:
+    linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.score-high{
+  background:
+    linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.viral-score-label{
+
+  font-size:14px;
+
+  font-weight:700;
+
+  color:#cbd5e1;
+}
+    .section-title{
+
+      font-size:20px;
+
+      font-weight:800;
+
+      margin-top:28px;
+
+      margin-bottom:10px;
+
+      color:#60a5fa;
+    }
+
+    .hook{
+      color:#f97316;
+    }
+
+    .saved-script{
+
+      background:#020617;
+
+      border:
+        1px solid rgba(255,255,255,0.05);
+
+      border-radius:16px;
+
+      padding:18px;
+
+      margin-bottom:14px;
+
+      line-height:1.6;
+    }
+
+    .saved-actions{
+
+      margin-top:12px;
+
+      display:flex;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+    }
+
+    .copy-btn{
+      background:#1e293b;
+      padding:10px 14px;
+      font-size:13px;
+    }
+
+    .delete-btn{
+      background:#dc2626;
+      padding:10px 14px;
+      font-size:13px;
+    }
+
+    .template-card{
+
+      background:#020617;
+
+      border:
+        1px solid rgba(255,255,255,0.06);
+
+      border-radius:16px;
+
+      padding:18px;
+
+      line-height:1.5;
+    }
+
+    .template-card p{
+      color:#cbd5e1;
+      font-size:14px;
+      margin-top:8px;
+    }
+
+    .template-actions{
+
+      margin-top:14px;
+
+      display:flex;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+    }
+
+    .status-board{
+
+      display:grid;
+
+      grid-template-columns:
+        repeat(auto-fit,minmax(240px,1fr));
+
+      gap:18px;
+
+      margin-top:22px;
+    }
+
+    .status-column{
+
+      background:
+        rgba(2,6,23,0.75);
+
+      border:
+        1px solid rgba(255,255,255,0.05);
+
+      border-radius:18px;
+
+      padding:16px;
+
+      min-height:320px;
+    }
+
+    .status-heading{
+
+      font-size:18px;
+
+      font-weight:800;
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:center;
+
+      margin-bottom:16px;
+    }
+
+    .status-heading span{
+
+      background:#1e293b;
+
+      padding:4px 10px;
+
+      border-radius:999px;
+
+      font-size:12px;
+    }
+
+    .status-card{
+
+      background:#0f172a;
+
+      border:
+        1px solid rgba(255,255,255,0.05);
+
+      border-radius:14px;
+
+      padding:14px;
+
+      margin-bottom:12px;
+    }
+
+    .status-card select{
+      width:100%;
+      margin-top:12px;
+    }
+
+    .status-empty,
+    .planner-empty{
+
+      color:#64748b;
+
+      font-size:14px;
+    }
+
+    .upload-planner{
+      margin-top:22px;
+    }
+
+    .planner-card{
+
+      background:#0f172a;
+
+      border:
+        1px solid rgba(255,255,255,0.05);
+
+      border-radius:16px;
+
+      padding:18px;
+
+      margin-bottom:14px;
+
+      display:flex;
+
+      justify-content:space-between;
+
+      gap:18px;
+
+      align-items:center;
+
+      flex-wrap:wrap;
+    }
+
+    .planner-date{
+
+      margin-top:8px;
+
+      font-size:14px;
+
+      color:#60a5fa;
+
+      font-weight:700;
+    }
+
+    .planner-actions{
+
+      display:flex;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+    }
+
+    .toast{
+
+      position:fixed;
+
+      bottom:30px;
+      right:30px;
+
+      background:#111827;
+
+      color:white;
+
+      padding:14px 20px;
+
+      border-radius:12px;
+
+      opacity:0;
+
+      transform:translateY(20px);
+
+      transition:all 0.3s ease;
+
+      pointer-events:none;
+
+      z-index:9999;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+    .loading-state{
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:18px;
+
+  padding:50px 20px;
+
+  text-align:center;
+}
+
+.spinner{
+
+  width:52px;
+
+  height:52px;
+
+  border-radius:999px;
+
+  border:4px solid rgba(255,255,255,0.12);
+
+  border-top:4px solid #3b82f6;
+
+  animation:spin 0.8s linear infinite;
+}
+
+.loading-text{
+
+  color:#cbd5e1;
+
+  font-size:16px;
+
+  font-weight:700;
+}
+
+.error-box{
+
+  background:#1e293b;
+
+  border:
+    1px solid rgba(239,68,68,0.25);
+
+  border-radius:18px;
+
+  padding:24px;
+
+  text-align:center;
+}
+
+.error-title{
+
+  color:#ef4444;
+
+  font-size:20px;
+
+  font-weight:800;
+
+  margin-bottom:10px;
+}
+
+.error-message{
+
+  color:#cbd5e1;
+
+  line-height:1.6;
+}
+
+@keyframes spin{
+  from{
+    transform:rotate(0deg);
+  }
+
+  to{
+    transform:rotate(360deg);
+  }
+}
+.theme-dark{
+  background:
+    radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
+    radial-gradient(circle at top right,#7c3aed 0%,transparent 30%),
+    #020617;
+}
+
+.theme-neon{
+  background:
+    radial-gradient(circle at top left,#06b6d4 0%,transparent 30%),
+    radial-gradient(circle at top right,#ec4899 0%,transparent 30%),
+    #020617;
+}
+
+.theme-midnight{
+  background:
+    radial-gradient(circle at top left,#111827 0%,transparent 30%),
+    radial-gradient(circle at top right,#1e293b 0%,transparent 30%),
+    #000000;
+}
+    @media(max-width:768px){
+
+      .header h1{
+        font-size:44px;
+      }
+
+      .topbar,
+      .filter-row,
+      .workspace-row{
+        flex-direction:column;
+      }
+
+      input,
+      select{
+        width:100%;
+      }
+
+      button{
+        width:100%;
+      }
+      .card{
+  padding:20px;
+  border-radius:18px;
+}
+
+.header{
+  margin-bottom:24px;
+}
+
+.header p{
+  font-size:15px;
+}
+
+.button-row,
+.preset-grid,
+.template-grid,
+.status-board{
+  grid-template-columns:1fr;
+}
+
+.usage-card{
+  align-items:stretch;
+}
+
+.output-box{
+  padding:18px;
+  font-size:14px;
+}
+
+.planner-card{
+  align-items:stretch;
+}
+    }
+
   </style>
 </head>
 
@@ -195,47 +806,470 @@
 
     <div class="header">
       <h1>🚀 ShortForge AI</h1>
-      <p>Create viral TikTok & Shorts scripts instantly</p>
+
+      <p>
+        Create viral TikTok & Shorts content instantly
+      </p>
     </div>
 
     <div class="card">
+
+      <div class="usage-card">
+
+        <div>
+          <div class="usage-title">
+            Free Plan
+          </div>
+
+          <div class="usage-sub">
+            <span id="usageText">
+              Loading usage...
+            </span>
+          </div>
+        </div>
+
+        <div class="button-row" style="margin-top:0;">
+
+          <div
+            id="usageBadge"
+            class="usage-badge"
+          >
+            0 left
+          </div>
+
+          <button
+            class="upgrade-btn"
+            onclick="showUpgradeMessage()"
+          >
+            Upgrade Pro
+          </button>
+
+        </div>
+
+      </div>
+
+      <h3>Workspace</h3>
+
+      <div class="small-note">
+        Organize separate channels, niches, and projects.
+      </div>
+
+      <div class="workspace-row">
+
+        <select
+          id="workspaceSelect"
+          onchange="switchWorkspace()"
+        ></select>
+
+        <button
+          class="secondary"
+          onclick="createWorkspace()"
+        >
+          New Workspace
+        </button>
+
+        <button
+          class="danger"
+          onclick="deleteWorkspace()"
+        >
+          Delete Workspace
+        </button>
+
+      </div>
+
+      <h3>Create Content</h3>
+
       <div class="topbar">
-        <input id="topic" placeholder="Enter a viral video idea..." />
+
+        <input
+          id="topic"
+          placeholder="Enter a viral video idea or niche..."
+        />
 
         <select id="mode">
           <option value="viral">🔥 Viral</option>
+          <option value="story">📖 Story</option>
+          <option value="controversial">⚡ Controversial</option>
+          <option value="animal">🐾 Animal Video</option>
           <option value="fitness">💪 Fitness</option>
+          <option value="money">💰 Money</option>
+          <option value="brainrot">🧠 Brainrot</option>
+          <option value="mrbeast">🎬 MrBeast Style</option>
         </select>
+
+        <select id="goal">
+          <option value="views">👀 Get Views</option>
+          <option value="followers">📈 Build Followers</option>
+          <option value="money">💰 Make Money</option>
+          <option value="product">🛒 Sell Product</option>
+          <option value="faceless">🎭 Faceless Channel</option>
+          <option value="animal">🐾 Animal Content</option>
+          <option value="gym">💪 Gym Content</option>
+          <option value="story">📖 Storytelling</option>
+        </select>
+
       </div>
 
-      <div class="button-row">
-        <button class="primary" onclick="generate()">Generate</button>
-        <button class="secondary" onclick="copyScript()">Copy</button>
-        <button class="secondary" onclick="saveScript()">Save</button>
-        <button class="viral" onclick="improveScript()">Make More Viral 🔥</button>
-        <button class="logout" onclick="logout()">Logout</button>
+      <h3>Prompt Library</h3>
+
+      <div class="small-note">
+        Click a preset to instantly fill the idea box.
       </div>
+
+      <div class="preset-grid">
+
+        <button onclick="usePromptPreset('faceless')">
+          🎥 Faceless Documentary
+        </button>
+
+        <button onclick="usePromptPreset('animalStory')">
+          🐾 AI Animal Story
+        </button>
+
+        <button onclick="usePromptPreset('gym')">
+          💪 Gym Motivation
+        </button>
+
+        <button onclick="usePromptPreset('money')">
+          💰 Side Hustle
+        </button>
+
+        <button onclick="usePromptPreset('mrbeast')">
+          🎬 MrBeast Challenge
+        </button>
+
+        <button onclick="usePromptPreset('brainrot')">
+          🧠 Brainrot Chaos
+        </button>
+
+        <button onclick="usePromptPreset('controversial')">
+          ⚡ Controversial Take
+        </button>
+
+        <button onclick="usePromptPreset('story')">
+          📖 Emotional Story
+        </button>
+
+      </div>
+
+      <h3>Template Gallery</h3>
+
+      <div class="small-note">
+        Load reusable viral content templates or favorite your best ones.
+      </div>
+
+      <div
+        id="templateGallery"
+        class="template-grid"
+      ></div>
+
+      <h3>Favorite Templates</h3>
+
+      <div class="small-note">
+        Your saved favorite templates appear here.
+      </div>
+
+      <div
+        id="favoriteTemplates"
+        class="template-grid"
+      ></div>
+
+      <div class="button-row"><div class="section-title">CORE TOOLS</div>
+
+        <button
+          class="primary"
+          onclick="generate()"
+        >
+          Generate
+        </button>
+<div class="section-title">STRATEGY TOOLS</div>
+        <button
+          class="trend"
+          onclick="trendDashboard()"
+        >
+          Trend Dashboard 📈
+        </button>
+
+        <button
+          class="analytics"
+          onclick="analyticsDashboard()"
+        >
+          Analytics Dashboard 📊
+        </button>
+
+        <button
+  class="analytics"
+  onclick="channelIntelligence()"
+>
+  Channel Intelligence 🧠
+</button>
+
+<button
+  class="analytics"
+  onclick="seriesGenerator()"
+>
+  AI Series Generator 📺
+</button>
+
+        <button
+          class="secondary"
+          onclick="generateIdeas()"
+        >
+          Trending Ideas 🔥
+        </button>
+
+        <button
+          class="secondary"
+          onclick="analyzeHook()"
+        >
+          Analyze Hook 🧠
+        </button>
+<button
+  class="secondary"
+  onclick="hookGenerator()"
+>
+  AI Hook Generator 🪝
+</button>
+<button
+  class="secondary"
+  onclick="platformFormatter()"
+>
+  Platform Formatter 📱
+</button>
+<button
+  class="secondary"
+  onclick="nicheFinder()"
+>
+  AI Niche Finder 💡
+</button>
+<button
+  class="secondary"
+  onclick="monetizationDashboard()"
+>
+  Monetization Dashboard 💰
+</button>
+        <div class="section-title">PRODUCTION TOOLS</div>
+<button
+          class="thumbnail"
+          onclick="thumbnailStudio()"
+        >
+          Thumbnail Studio 🖼️
+        </button>
+        <button
+  class="thumbnail"
+  onclick="thumbnailGenerator()"
+>
+  AI Thumbnail Generator 🎨
+</button>
+<button
+  class="analytics"
+  onclick="voiceoverScript()"
+>
+  AI Voiceover Script 🎙️
+</button>
+
+        <button
+          class="brand"
+          onclick="brandingSuite()"
+        >
+          Branding Suite 🎨
+        </button>
+
+        <button
+          class="export"
+          onclick="videoSceneGenerator()"
+        >
+          AI Video Scenes 🎥
+        </button>
+
+        <button
+          class="export"
+          onclick="exportCapCut()"
+        >
+          CapCut Export 🎬
+        </button>
+<div class="section-title">EXPORT & SAVE</div>
+        <button
+          class="download"
+          onclick="downloadOutput()"
+        >
+          Download .txt
+        </button>
+
+        <button
+          class="secondary"
+          onclick="copyScript()"
+        >
+          Copy
+        </button>
+
+        <button
+          class="secondary"
+          onclick="saveScript()"
+        >
+          Save
+        </button>
+
+        <button
+          class="viral"
+          onclick="improveScript()"
+        >
+          Make More Viral 🔥
+        </button>
+        <div class="section-title">ACCOUNT</div>
+<button
+  class="secondary"
+  onclick="toggleTheme()"
+>
+  Toggle Theme 🌙
+</button>
+        <button
+          class="logout"
+          onclick="logout()"
+        >
+          Logout
+        </button>
+
+      </div>
+
     </div>
 
     <div class="card">
-      <h2>Generated Script</h2>
-      <div id="output" class="output-box">Your viral script will appear here...</div>
+
+      <h2>Generated Content</h2>
+
+      <div
+        id="output"
+        class="output-box"
+      >
+        Your AI-generated content will appear here...
+      </div>
+
+    </div>
+
+    
+<div class="card">
+  <h2>Competitor Tracker</h2>
+
+  <div class="small-note">
+    Track channels in your niche so you can study what is working.
+  </div>
+
+  <div class="topbar">
+    <input id="competitorName" placeholder="Channel or creator name..." />
+    <input id="competitorPlatform" placeholder="Platform..." />
+    <input id="competitorNiche" placeholder="Niche..." />
+    <input id="competitorNotes" placeholder="Notes / what they do well..." />
+
+    <button class="secondary" onclick="addCompetitor()">
+      Add Competitor
+    </button>
+  </div>
+
+  <div id="competitorTracker" class="template-grid"></div>
+</div>
+<div class="card">
+<h2>Upload Planner</h2>
+
+      <div class="small-note">
+        Schedule upcoming uploads and content releases.
+      </div>
+
+      <div
+        id="uploadPlanner"
+        class="upload-planner"
+      ></div>
+
     </div>
 
     <div class="card">
+  <h2>Content Calendar</h2>
+
+  <div class="small-note">
+    View today's posts, this week's schedule, and your consistency score.
+  </div>
+
+  <div id="contentCalendar"></div>
+</div>
+    <div class="card">
+
+      <h2>Status Board</h2>
+
+      <div class="small-note">
+        Track scripts through production stages.
+      </div>
+
+      <div
+        id="statusBoard"
+        class="status-board"
+      ></div>
+
+    </div>
+
+    <div class="card">
+
       <h2>Saved Scripts</h2>
-      <div id="saved" class="saved-container"></div>
-    </div>
 
-    <div class="footer-note">
-      ShortForge AI • Viral Content Engine
+      <div class="filter-title">
+        Search and filter saved scripts.
+      </div>
+
+      <div class="filter-row">
+
+        <input
+          id="savedSearch"
+          placeholder="Search saved scripts..."
+          oninput="renderSavedScripts()"
+        />
+
+        <select
+          id="savedModeFilter"
+          onchange="renderSavedScripts()"
+        >
+
+          <option value="all">All Modes</option>
+          <option value="viral">🔥 Viral</option>
+          <option value="story">📖 Story</option>
+          <option value="controversial">⚡ Controversial</option>
+          <option value="animal">🐾 Animal Video</option>
+          <option value="fitness">💪 Fitness</option>
+          <option value="money">💰 Money</option>
+          <option value="brainrot">🧠 Brainrot</option>
+          <option value="mrbeast">🎬 MrBeast Style</option>
+
+        </select>
+
+        <select
+          id="savedStatusFilter"
+          onchange="renderSavedScripts()"
+        >
+
+          <option value="all">All Statuses</option>
+          <option value="Idea">Idea</option>
+          <option value="Script Ready">Script Ready</option>
+          <option value="Needs Editing">Needs Editing</option>
+          <option value="Ready to Post">Ready to Post</option>
+          <option value="Posted">Posted</option>
+
+        </select>
+
+      </div>
+
+      <div
+        id="saved"
+        style="margin-top:18px;"
+      ></div>
+
     </div>
 
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div
+    id="toast"
+    class="toast"
+  ></div>
 
-  <script type="module" src="app.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
