@@ -1,14 +1,446 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Redirecting...</title>
-  <meta http-equiv="refresh" content="0; url=/dashboard.html">
-</head>
-<body style="background:#020617; color:white; font-family:Arial; text-align:center; padding:40px;">
-  <p>Redirecting to dashboard...</p>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <script>
-    window.location.replace("/dashboard.html");
-  </script>
+  <title>ShortForge AI</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Inter,Arial,sans-serif;
+
+      background:
+        radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
+        radial-gradient(circle at top right,#7c3aed 0%,transparent 30%),
+        #020617;
+
+      color:white;
+
+      min-height:100vh;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:auto;
+      padding:40px 20px;
+    }
+
+    .nav{
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:center;
+
+      margin-bottom:80px;
+    }
+
+    .logo{
+      font-size:28px;
+      font-weight:800;
+    }
+
+    .nav a{
+
+      text-decoration:none;
+
+      color:white;
+
+      background:
+        linear-gradient(135deg,#3b82f6,#2563eb);
+
+      padding:14px 20px;
+
+      border-radius:14px;
+
+      font-weight:700;
+    }
+
+    .hero{
+      text-align:center;
+      padding:80px 0;
+    }
+
+    .hero h1{
+
+      font-size:72px;
+
+      font-weight:900;
+
+      line-height:1.05;
+
+      margin-bottom:24px;
+    }
+
+    .gradient{
+      background:
+        linear-gradient(135deg,#60a5fa,#a78bfa);
+
+      -webkit-background-clip:text;
+
+      -webkit-text-fill-color:transparent;
+    }
+
+    .hero p{
+
+      max-width:760px;
+
+      margin:auto;
+
+      color:#cbd5e1;
+
+      font-size:22px;
+
+      line-height:1.7;
+
+      margin-bottom:40px;
+    }
+
+    .hero-buttons{
+
+      display:flex;
+
+      gap:18px;
+
+      justify-content:center;
+
+      flex-wrap:wrap;
+    }
+
+    .primary-btn,
+    .secondary-btn{
+
+      text-decoration:none;
+
+      padding:18px 28px;
+
+      border-radius:18px;
+
+      font-weight:800;
+
+      font-size:18px;
+
+      transition:0.2s ease;
+    }
+
+    .primary-btn{
+
+      background:
+        linear-gradient(135deg,#3b82f6,#2563eb);
+
+      color:white;
+    }
+
+    .secondary-btn{
+
+      background:#111827;
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      color:white;
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .features{
+
+      margin-top:100px;
+
+      display:grid;
+
+      grid-template-columns:
+        repeat(auto-fit,minmax(280px,1fr));
+
+      gap:24px;
+    }
+
+    .feature-card{
+
+      background:
+        rgba(15,23,42,0.75);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      backdrop-filter:blur(10px);
+
+      border-radius:24px;
+
+      padding:28px;
+    }
+
+    .feature-card h3{
+
+      font-size:22px;
+
+      margin-bottom:14px;
+    }
+
+    .feature-card p{
+
+      color:#cbd5e1;
+
+      line-height:1.7;
+    }
+
+    .section-title{
+
+      text-align:center;
+
+      font-size:42px;
+
+      font-weight:900;
+
+      margin-top:120px;
+
+      margin-bottom:20px;
+    }
+
+    .section-sub{
+
+      text-align:center;
+
+      color:#94a3b8;
+
+      max-width:760px;
+
+      margin:auto;
+
+      line-height:1.7;
+
+      font-size:18px;
+
+      margin-bottom:50px;
+    }
+
+    .pricing{
+
+      margin-top:60px;
+
+      display:grid;
+
+      grid-template-columns:
+        repeat(auto-fit,minmax(320px,1fr));
+
+      gap:24px;
+    }
+
+    .pricing-card{
+
+      background:
+        rgba(15,23,42,0.8);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      border-radius:28px;
+
+      padding:36px;
+    }
+
+    .pricing-card.pro{
+
+      border:
+        2px solid #3b82f6;
+
+      transform:scale(1.03);
+    }
+
+    .price{
+
+      font-size:58px;
+
+      font-weight:900;
+
+      margin:18px 0;
+    }
+
+    ul{
+      margin-top:20px;
+      padding-left:20px;
+      line-height:2;
+      color:#cbd5e1;
+    }
+
+    .footer{
+
+      margin-top:120px;
+
+      text-align:center;
+
+      color:#64748b;
+
+      padding-bottom:40px;
+    }
+
+    @media(max-width:768px){
+
+      .hero h1{
+        font-size:48px;
+      }
+
+      .hero p{
+        font-size:18px;
+      }
+
+      .section-title{
+        font-size:34px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="nav">
+      <div class="logo">
+        🚀 ShortForge AI
+      </div>
+
+      <a href="/dashboard.html">
+        Open Dashboard
+      </a>
+    </div>
+
+    <div class="hero">
+
+      <h1>
+        Build Viral Content With
+        <span class="gradient">
+          AI Creator Tools
+        </span>
+      </h1>
+
+      <p>
+        ShortForge AI helps creators generate viral short-form content,
+        hooks, thumbnails, monetization strategies, posting systems,
+        branding ideas, and full creator workflows in seconds.
+      </p>
+
+      <div class="hero-buttons">
+
+        <a
+          class="primary-btn"
+          href="/dashboard.html"
+        >
+          Launch App
+        </a>
+
+        <a
+          class="secondary-btn"
+          href="/dashboard.html"
+        >
+          View Dashboard
+        </a>
+
+      </div>
+
+    </div>
+
+    <div class="features">
+
+      <div class="feature-card">
+        <h3>🔥 Viral Script Generator</h3>
+
+        <p>
+          Generate high-retention TikTok, Reels, and Shorts scripts designed for maximum engagement.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <h3>📈 Trend Intelligence</h3>
+
+        <p>
+          Discover viral content opportunities, niche gaps, monetization ideas, and growth strategies.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <h3>🎬 Production Workflow</h3>
+
+        <p>
+          Build thumbnails, scene plans, voiceovers, posting schedules, and creator systems automatically.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="section-title">
+      Built For Modern Creators
+    </div>
+
+    <div class="section-sub">
+      Whether you're building a faceless AI brand, growing a YouTube Shorts page,
+      scaling TikTok content, or creating monetized creator businesses —
+      ShortForge gives you the operating system.
+    </div>
+
+    <div class="section-title">
+      Pricing
+    </div>
+
+    <div class="pricing">
+
+      <div class="pricing-card">
+
+        <h3>Free</h3>
+
+        <div class="price">
+          $0
+        </div>
+
+        <ul>
+          <li>25 generations</li>
+          <li>Core AI tools</li>
+          <li>Workspace system</li>
+          <li>Saved scripts</li>
+        </ul>
+
+      </div>
+
+      <div class="pricing-card pro">
+
+        <h3>Pro</h3>
+
+        <div class="price">
+          $19
+        </div>
+
+        <ul>
+          <li>Unlimited generations</li>
+          <li>Advanced creator tools</li>
+          <li>Future AI image tools</li>
+          <li>Priority features</li>
+        </ul>
+
+      </div>
+
+    </div>
+
+    <div class="footer">
+      © 2026 ShortForge AI • Creator Operating System
+    </div>
+
+  </div>
+
 </body>
 </html>
