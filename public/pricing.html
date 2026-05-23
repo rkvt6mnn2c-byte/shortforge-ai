@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>ShortForge AI Pricing</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Inter,Arial,sans-serif;
+
+      background:
+        radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
+        radial-gradient(circle at top right,#7c3aed 0%,transparent 30%),
+        #020617;
+
+      color:white;
+
+      min-height:100vh;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:auto;
+      padding:40px 20px;
+    }
+
+    .nav{
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:center;
+
+      margin-bottom:80px;
+    }
+
+    .logo{
+      font-size:28px;
+      font-weight:800;
+    }
+
+    .nav-links{
+
+      display:flex;
+
+      gap:14px;
+
+      flex-wrap:wrap;
+    }
+
+    .nav a{
+
+      text-decoration:none;
+
+      color:white;
+
+      background:#111827;
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      padding:14px 18px;
+
+      border-radius:14px;
+
+      font-weight:700;
+    }
+
+    .hero{
+      text-align:center;
+      margin-bottom:80px;
+    }
+
+    .hero h1{
+
+      font-size:64px;
+
+      font-weight:900;
+
+      margin-bottom:20px;
+    }
+
+    .hero p{
+
+      color:#cbd5e1;
+
+      font-size:20px;
+
+      max-width:720px;
+
+      margin:auto;
+
+      line-height:1.7;
+    }
+
+    .pricing-grid{
+
+      display:grid;
+
+      grid-template-columns:
+        repeat(auto-fit,minmax(320px,1fr));
+
+      gap:28px;
+    }
+
+    .pricing-card{
+
+      background:
+        rgba(15,23,42,0.8);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      border-radius:28px;
+
+      padding:36px;
+
+      position:relative;
+    }
+
+    .pricing-card.pro{
+
+      border:
+        2px solid #3b82f6;
+
+      transform:scale(1.03);
+    }
+
+    .badge{
+
+      position:absolute;
+
+      top:18px;
+
+      right:18px;
+
+      background:
+        linear-gradient(135deg,#3b82f6,#2563eb);
+
+      padding:8px 12px;
+
+      border-radius:999px;
+
+      font-size:12px;
+
+      font-weight:800;
+    }
+
+    h2{
+      font-size:32px;
+      margin-bottom:10px;
+    }
+
+    .price{
+
+      font-size:64px;
+
+      font-weight:900;
+
+      margin:24px 0;
+    }
+
+    .price span{
+      font-size:20px;
+      color:#94a3b8;
+    }
+
+    ul{
+      margin-top:24px;
+      padding-left:20px;
+      line-height:2.1;
+      color:#cbd5e1;
+    }
+
+    .btn{
+
+      display:block;
+
+      text-align:center;
+
+      text-decoration:none;
+
+      margin-top:32px;
+
+      padding:18px;
+
+      border-radius:18px;
+
+      font-weight:800;
+
+      font-size:18px;
+    }
+
+    .free-btn{
+      background:#111827;
+      color:white;
+    }
+
+    .pro-btn{
+
+      background:
+        linear-gradient(135deg,#3b82f6,#2563eb);
+
+      color:white;
+    }
+
+    .comparison{
+
+      margin-top:120px;
+    }
+
+    .comparison h3{
+
+      text-align:center;
+
+      font-size:42px;
+
+      margin-bottom:40px;
+    }
+
+    table{
+
+      width:100%;
+
+      border-collapse:collapse;
+
+      background:
+        rgba(15,23,42,0.75);
+
+      border-radius:20px;
+
+      overflow:hidden;
+    }
+
+    th,
+    td{
+
+      padding:20px;
+
+      border-bottom:
+        1px solid rgba(255,255,255,0.06);
+
+      text-align:left;
+    }
+
+    th{
+      color:#60a5fa;
+    }
+
+    .footer{
+
+      text-align:center;
+
+      margin-top:100px;
+
+      color:#64748b;
+
+      padding-bottom:40px;
+    }
+
+    @media(max-width:768px){
+
+      .hero h1{
+        font-size:44px;
+      }
+
+      .price{
+        font-size:48px;
+      }
+
+      .comparison h3{
+        font-size:34px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="nav">
+
+      <div class="logo">
+        🚀 ShortForge AI
+      </div>
+
+      <div class="nav-links">
+
+        <a href="/">
+          Home
+        </a>
+
+        <a href="/dashboard.html">
+          Dashboard
+        </a>
+
+      </div>
+
+    </div>
+
+    <div class="hero">
+
+      <h1>
+        Simple Pricing For
+        Modern Creators
+      </h1>
+
+      <p>
+        Start free and scale your content operation with powerful AI creator tools,
+        viral systems, monetization dashboards, and production workflows.
+      </p>
+
+    </div>
+
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+
+        <h2>Free</h2>
+
+        <div class="price">
+          $0
+        </div>
+
+        <ul>
+          <li>25 monthly generations</li>
+          <li>Core script generation</li>
+          <li>Workspace system</li>
+          <li>Saved scripts</li>
+          <li>Basic creator tools</li>
+        </ul>
+
+        <a
+          class="btn free-btn"
+          href="/dashboard.html"
+        >
+          Start Free
+        </a>
+
+      </div>
+
+      <div class="pricing-card pro">
+
+        <div class="badge">
+          MOST POPULAR
+        </div>
+
+        <h2>Pro</h2>
+
+        <div class="price">
+          $19
+          <span>/month</span>
+        </div>
+
+        <ul>
+          <li>Unlimited generations</li>
+          <li>Advanced AI creator tools</li>
+          <li>Monetization dashboards</li>
+          <li>Trend intelligence</li>
+          <li>Thumbnail systems</li>
+          <li>Production workflows</li>
+          <li>Future AI image tools</li>
+          <li>Priority updates</li>
+        </ul>
+
+        <a
+          class="btn pro-btn"
+          href="/dashboard.html"
+        >
+          Upgrade Soon
+        </a>
+
+      </div>
+
+    </div>
+
+    <div class="comparison">
+
+      <h3>
+        Feature Comparison
+      </h3>
+
+      <table>
+
+        <tr>
+          <th>Feature</th>
+          <th>Free</th>
+          <th>Pro</th>
+        </tr>
+
+        <tr>
+          <td>Script Generation</td>
+          <td>✓</td>
+          <td>✓</td>
+        </tr>
+
+        <tr>
+          <td>Trend Dashboard</td>
+          <td>✓</td>
+          <td>✓</td>
+        </tr>
+
+        <tr>
+          <td>Unlimited Usage</td>
+          <td>—</td>
+          <td>✓</td>
+        </tr>
+
+        <tr>
+          <td>Thumbnail Tools</td>
+          <td>Basic</td>
+          <td>Advanced</td>
+        </tr>
+
+        <tr>
+          <td>AI Monetization Tools</td>
+          <td>—</td>
+          <td>✓</td>
+        </tr>
+
+        <tr>
+          <td>Future AI Video Tools</td>
+          <td>—</td>
+          <td>✓</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+    <div class="footer">
+      © 2026 ShortForge AI
+    </div>
+
+  </div>
+
+</body>
+</html>
