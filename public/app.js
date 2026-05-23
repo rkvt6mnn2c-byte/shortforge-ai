@@ -1105,6 +1105,99 @@ window.monetizationDashboard = async () => {
     "Monetization dashboard failed"
   );
 };
+window.generateAIImage = async () => {
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  if (!requirePro("AI Image Generator")) return;
+
+  const output = document.getElementById("output");
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        🎨 Generating AI thumbnail image...
+      </div>
+    </div>
+  `;
+
+  const prompt =
+    `Create a high-click YouTube Shorts thumbnail image for this video.
+    Make it cinematic, dramatic, bold, colorful, high contrast, vertical creator content style.
+    No text in the image.
+    
+    Video concept:
+    ${lastGenerated}`;
+
+  try {
+    const res = await fetch("/generate-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.image) {
+      throw new Error(data.error || "Image failed");
+    }
+
+    output.innerHTML = `
+      <div class="section-title">
+        AI THUMBNAIL IMAGE
+      </div>
+
+      <div class="image-result-card">
+        <img
+          src="data:image/png;base64,${data.image}"
+          alt="AI generated thumbnail"
+          class="generated-image"
+        />
+
+        <button
+          class="copy-btn"
+          onclick="downloadGeneratedImage('${data.image}')"
+        >
+          Download Image
+        </button>
+      </div>
+    `;
+
+    showToast("AI image generated!");
+
+  } catch (error) {
+    console.error(error);
+    showToast("Image generation failed");
+
+    output.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">
+          ⚠️ Image Generation Failed
+        </div>
+
+        <div class="error-message">
+          ${error.message}
+        </div>
+      </div>
+    `;
+  }
+};
+
+window.downloadGeneratedImage = (base64Image) => {
+  const a = document.createElement("a");
+
+  a.href = `data:image/png;base64,${base64Image}`;
+  a.download = `shortforge-thumbnail-${Date.now()}.png`;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
 window.thumbnailGenerator = async () => {
     if (!requirePro("Feature Name")) return;
   const topic = document.getElementById("topic").value.trim();

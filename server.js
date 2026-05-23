@@ -766,6 +766,34 @@ app.post("/create-checkout-session", async (req, res) => {
     });
   }
 });
+app.post("/generate-image", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({
+        error: "Image prompt is required"
+      });
+    }
+
+    const image = await client.images.generate({
+      model: "gpt-image-1",
+      prompt,
+      size: "1024x1024"
+    });
+
+    res.json({
+      image: image.data[0].b64_json
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Image generation failed"
+    });
+  }
+});
 app.listen(PORT, () => {
   console.log(`🚀 ShortForge AI running at http://localhost:${PORT}/dashboard.html`);
 });
