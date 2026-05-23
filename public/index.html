@@ -51,7 +51,11 @@
       font-size:28px;
       font-weight:800;
     }
-
+.nav-links{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+}
     .nav a{
 
       text-decoration:none;
@@ -277,7 +281,85 @@
       line-height:2;
       color:#cbd5e1;
     }
+.social-proof{
+  margin-top:120px;
+}
 
+.stats-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(240px,1fr));
+
+  gap:22px;
+
+  margin-top:50px;
+}
+
+.stat-card{
+
+  background:
+    rgba(15,23,42,0.75);
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  border-radius:24px;
+
+  padding:30px;
+
+  text-align:center;
+}
+
+.stat-card h2{
+
+  font-size:52px;
+
+  margin-bottom:10px;
+
+  color:#60a5fa;
+}
+
+.stat-card p{
+  color:#cbd5e1;
+}
+
+.testimonial-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(280px,1fr));
+
+  gap:24px;
+
+  margin-top:50px;
+}
+
+.testimonial-card{
+
+  background:
+    rgba(15,23,42,0.75);
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  border-radius:24px;
+
+  padding:28px;
+
+  line-height:1.8;
+}
+
+.testimonial-card strong{
+
+  display:block;
+
+  margin-top:18px;
+
+  color:#60a5fa;
+}
     .footer{
 
       margin-top:120px;
@@ -316,9 +398,15 @@
         🚀 ShortForge AI
       </div>
 
-      <a href="/dashboard.html">
-        Open Dashboard
-      </a>
+      <div class="nav-links">
+  <a href="/pricing.html">
+    Pricing
+  </a>
+
+  <a href="/dashboard.html">
+    Open Dashboard
+  </a>
+</div>
     </div>
 
     <div class="hero">
@@ -435,7 +523,65 @@
       </div>
 
     </div>
+<section class="social-proof">
 
+  <div class="section-title">
+    Trusted By Modern Creators
+  </div>
+
+  <div class="section-sub">
+    Built for TikTok creators, YouTube Shorts channels,
+    faceless brands, AI content pages, and creator businesses.
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <h2>10K+</h2>
+      <p>AI Content Ideas Generated</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>500+</h2>
+      <p>Creator Workflows Built</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>24/7</h2>
+      <p>AI Creator Assistance</p>
+    </div>
+
+  </div>
+
+  <div class="testimonial-grid">
+
+    <div class="testimonial-card">
+      <p>
+        “ShortForge helped me organize my entire Shorts workflow in one place.”
+      </p>
+
+      <strong>— YouTube Shorts Creator</strong>
+    </div>
+
+    <div class="testimonial-card">
+      <p>
+        “The monetization and thumbnail tools alone save me hours every week.”
+      </p>
+
+      <strong>— TikTok Creator</strong>
+    </div>
+
+    <div class="testimonial-card">
+      <p>
+        “Feels like an AI operating system for content creators.”
+      </p>
+
+      <strong>— Faceless Brand Builder</strong>
+    </div>
+
+  </div>
+
+</section>
     <div class="footer">
       © 2026 ShortForge AI • Creator Operating System
     </div>
