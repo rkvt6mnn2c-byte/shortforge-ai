@@ -1,3 +1,14 @@
+const SUPABASE_URL =
+  "https://swrzmuqnidomnpqxvjoj.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3cnptdXFuaWRvbW5wcXh2am9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MjAzMzUsImV4cCI6MjA5NDk5NjMzNX0.Cr9csw8f6eHwuVttve30tUbsuC0VMrmV6isZLDIyGmM";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
 const FREE_LIMIT = 25;
 const PRO_LIMIT = 999999;
 
@@ -160,7 +171,136 @@ const TEMPLATE_GALLERY = [
     topic: "A short viral product promo that makes a simple product feel unexpectedly useful, satisfying, and shareable."
   }
 ];
+async function updateAuthUI() {
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
 
+  const authStatus = document.getElementById("authStatus");
+  const authCard = document.getElementById("authCard");
+
+  if (!authStatus) return;
+
+  if (session?.user) {
+
+  authStatus.innerText =
+    `Logged in as ${session.user.email}`;
+
+  const emailInput =
+    document.getElementById("authEmail");
+
+  const passwordInput =
+    document.getElementById("authPassword");
+
+  const signUpBtn =
+    document.querySelector('button[onclick="signUp()"]');
+
+  const signInBtn =
+    document.querySelector('button[onclick="signIn()"]');
+
+  const logoutBtn =
+    document.getElementById("logoutBtn");
+
+  if (emailInput) emailInput.style.display = "none";
+  if (passwordInput) passwordInput.style.display = "none";
+  if (signUpBtn) signUpBtn.style.display = "none";
+  if (signInBtn) signInBtn.style.display = "none";
+
+  if (logoutBtn) {
+    logoutBtn.style.display = "block";
+  }
+
+  if (authCard) {
+    authCard.style.border =
+      "1px solid rgba(34,197,94,0.35)";
+  }
+
+} else {
+
+  authStatus.innerText = "Not logged in";
+
+  const emailInput =
+    document.getElementById("authEmail");
+
+  const passwordInput =
+    document.getElementById("authPassword");
+
+  const signUpBtn =
+    document.querySelector('button[onclick="signUp()"]');
+
+  const signInBtn =
+    document.querySelector('button[onclick="signIn()"]');
+
+  const logoutBtn =
+    document.getElementById("logoutBtn");
+
+  if (emailInput) emailInput.style.display = "block";
+  if (passwordInput) passwordInput.style.display = "block";
+  if (signUpBtn) signUpBtn.style.display = "block";
+  if (signInBtn) signInBtn.style.display = "block";
+
+  if (logoutBtn) {
+    logoutBtn.style.display = "none";
+  }
+
+  if (authCard) {
+    authCard.style.border =
+      "1px solid rgba(255,255,255,0.08)";
+  }
+}
+}
+
+window.signUp = async () => {
+  const email = document.getElementById("authEmail")?.value.trim();
+  const password = document.getElementById("authPassword")?.value.trim();
+
+  if (!email || !password) {
+    showToast("Enter email and password");
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    showToast(error.message);
+    return;
+  }
+
+  showToast("Check your email to confirm signup");
+  updateAuthUI();
+};
+
+window.signIn = async () => {
+  const email = document.getElementById("authEmail")?.value.trim();
+  const password = document.getElementById("authPassword")?.value.trim();
+
+  if (!email || !password) {
+    showToast("Enter email and password");
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    showToast(error.message);
+    return;
+  }
+
+  showToast("Logged in!");
+  updateAuthUI();
+};
+
+window.logout = async () => {
+  await supabaseClient.auth.signOut();
+  showToast("Logged out");
+  updateAuthUI();
+};
 function showToast(message) {
   const toast = document.getElementById("toast");
   if (!toast) return alert(message);
@@ -1069,17 +1209,22 @@ window.downloadOutput = async () => {
   showToast("Download started!");
 };
 
-window.saveScript = () => {
-  if (!lastGenerated) return showToast("Generate content first");
+window.saveScript = async () => {
 
-  const topic = document.getElementById("topic").value.trim() || "Untitled";
-  const mode = document.getElementById("mode").value;
-  const goal = document.getElementById("goal").value;
+  if (!lastGenerated)
+    return showToast("Generate content first");
 
-  const key = `sf_saved_scripts_${currentWorkspaceId}`;
-  const scripts = JSON.parse(localStorage.getItem(key) || "[]");
+  const topic =
+    document.getElementById("topic").value.trim() ||
+    "Untitled";
 
-  scripts.unshift({
+  const mode =
+    document.getElementById("mode").value;
+
+  const goal =
+    document.getElementById("goal").value;
+
+  const scriptData = {
     id: `script-${Date.now()}`,
     topic,
     mode,
@@ -1088,32 +1233,127 @@ window.saveScript = () => {
     plannedAt: "",
     content: lastGenerated,
     createdAt: Date.now()
-  });
+  };
 
-  localStorage.setItem(key, JSON.stringify(scripts));
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
 
-  showToast("Saved to workspace!");
+  if (session?.user) {
+
+    const { error } =
+      await supabaseClient
+        .from("scripts")
+        .insert([
+          {
+            user_id: session.user.id,
+            topic: scriptData.topic,
+            mode: scriptData.mode,
+            goal: scriptData.goal,
+            status: scriptData.status,
+            planned_at: scriptData.plannedAt,
+            content: scriptData.content,
+            created_at:
+              new Date().toISOString()
+          }
+        ]);
+
+    if (error) {
+      console.error(error);
+      showToast("Cloud save failed");
+      return;
+    }
+
+    showToast("Saved to cloud!");
+
+  } else {
+
+    const key =
+      `sf_saved_scripts_${currentWorkspaceId}`;
+
+    const scripts =
+      JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+
+    scripts.unshift(scriptData);
+
+    localStorage.setItem(
+      key,
+      JSON.stringify(scripts)
+    );
+
+    showToast("Saved locally!");
+  }
+
   loadScripts();
 };
 
-window.loadScripts = () => {
-  const key = `sf_saved_scripts_${currentWorkspaceId}`;
-  savedScriptsCache = JSON.parse(localStorage.getItem(key) || "[]");
+window.loadScripts = async () => {
 
-  savedScriptsCache = savedScriptsCache.map(script => ({
-    ...script,
-    status: script.status || "Idea",
-    plannedAt: script.plannedAt || ""
-  }));
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
 
-  localStorage.setItem(key, JSON.stringify(savedScriptsCache));
+  if (session?.user) {
 
-renderSavedScripts();
-renderStatusBoard();
-renderUploadPlanner();
-renderContentCalendar();
-loadCompetitors();
+    const { data, error } =
+      await supabaseClient
+        .from("scripts")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", {
+          ascending: false
+        });
+
+    if (error) {
+      console.error(error);
+      showToast("Failed to load cloud scripts");
+      return;
+    }
+
+    savedScriptsCache = (data || []).map(script => ({
+      id: script.id,
+      topic: script.topic,
+      mode: script.mode,
+      goal: script.goal,
+      status: script.status || "Idea",
+      plannedAt: script.planned_at || "",
+      content: script.content,
+      createdAt: new Date(script.created_at).getTime()
+    }));
+
+  } else {
+
+    const key =
+      `sf_saved_scripts_${currentWorkspaceId}`;
+
+    savedScriptsCache =
+      JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+
+    savedScriptsCache =
+      savedScriptsCache.map(script => ({
+        ...script,
+        status: script.status || "Idea",
+        plannedAt: script.plannedAt || ""
+      }));
+
+    localStorage.setItem(
+      key,
+      JSON.stringify(savedScriptsCache)
+    );
+  }
+
+  renderSavedScripts();
+  renderStatusBoard();
+  renderUploadPlanner();
+  renderContentCalendar();
+  loadCompetitors();
 };
+
+  
 
 function formatPlannedDate(value) {
   if (!value) return "Not planned";
@@ -1461,9 +1701,7 @@ window.deleteScript = (id) => {
   loadScripts();
 };
 
-window.logout = () => {
-  showToast("Logout connected to auth later");
-};
+
 
 window.addEventListener("load", () => {
     const params = new URLSearchParams(window.location.search);

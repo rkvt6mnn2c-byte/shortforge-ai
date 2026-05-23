@@ -856,7 +856,60 @@
 <body>
 
   <div class="container">
+<div class="card" id="authCard">
 
+  <h2>Account</h2>
+
+  <div class="small-note">
+    Sign up or log in to save your scripts and Pro access across devices.
+  </div>
+
+  <div class="topbar">
+
+    <input
+      id="authEmail"
+      type="email"
+      placeholder="Email address"
+    />
+
+    <input
+      id="authPassword"
+      type="password"
+      placeholder="Password"
+    />
+
+    <button
+      class="primary"
+      onclick="signUp()"
+    >
+      Sign Up
+    </button>
+
+    <button
+      class="secondary"
+      onclick="signIn()"
+    >
+      Log In
+    </button>
+
+  </div>
+
+  <div
+    id="authStatus"
+    class="small-note"
+    style="margin-top:14px;"
+  >
+    Not logged in
+  </div>
+<button
+  id="logoutBtn"
+  class="secondary"
+  onclick="logout()"
+  style="display:none;margin-top:14px;"
+>
+  Logout
+</button>
+</div>
     <div class="header">
       <h1>🚀 ShortForge AI</h1>
 
@@ -1425,7 +1478,7 @@
     id="toast"
     class="toast"
   ></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
 </body>
