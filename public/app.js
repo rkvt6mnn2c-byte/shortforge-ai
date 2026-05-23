@@ -14,7 +14,43 @@ const STATUS_OPTIONS = [
   "Ready to Post",
   "Posted"
 ];
+window.applyOnboarding = () => {
+  const creatorType = document.getElementById("creatorType")?.value;
+  const creatorNiche = document.getElementById("creatorNiche")?.value.trim();
+  const creatorGoal = document.getElementById("creatorGoal")?.value;
 
+  if (!creatorNiche) {
+    showToast("Enter your niche first");
+    return;
+  }
+
+  document.getElementById("topic").value =
+    `Create a viral ${creatorType} short-form video idea for the ${creatorNiche} niche.`;
+
+  document.getElementById("goal").value = creatorGoal;
+
+  if (creatorType === "faceless") {
+    document.getElementById("mode").value = "viral";
+  }
+
+  if (creatorType === "story") {
+    document.getElementById("mode").value = "story";
+  }
+
+  if (creatorType === "fitness") {
+    document.getElementById("mode").value = "fitness";
+  }
+
+  if (creatorType === "money") {
+    document.getElementById("mode").value = "money";
+  }
+
+  if (creatorType === "animal") {
+    document.getElementById("mode").value = "animal";
+  }
+
+  showToast("Creator setup applied!");
+};
 const promptPresets = {
   faceless: {
     mode: "viral",
@@ -390,7 +426,21 @@ window.deleteCompetitor = (id) => {
 function isProUser() {
   return localStorage.getItem("sf_pro") === "true";
 }
+function requirePro(featureName = "This feature") {
+  if (isProUser()) return true;
 
+  showToast(`${featureName} is a Pro feature`);
+
+  const wantsUpgrade = confirm(
+    `${featureName} is included with ShortForge Pro.\n\nPro unlocks:\n- Unlimited generations\n- Premium creator tools\n- Advanced dashboards\n- Future AI image tools\n\nStripe checkout coming soon.`
+  );
+
+  if (wantsUpgrade) {
+    showUpgradeMessage();
+  }
+
+  return false;
+}
 function getGenerationLimit() {
   return isProUser() ? PRO_LIMIT : FREE_LIMIT;
 }
@@ -788,6 +838,7 @@ window.analyticsDashboard = async () => {
 };
 
 window.channelIntelligence = async () => {
+    if (!requirePro("Channel Intelligence")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -803,6 +854,7 @@ window.channelIntelligence = async () => {
   );
 };
 window.seriesGenerator = async () => {
+    if (!requirePro("Feature Name")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -875,6 +927,7 @@ window.nicheFinder = async () => {
   );
 };
 window.monetizationDashboard = async () => {
+    if (!requirePro("Feature Name")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -893,6 +946,7 @@ window.monetizationDashboard = async () => {
   );
 };
 window.thumbnailGenerator = async () => {
+    if (!requirePro("Feature Name")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -911,6 +965,7 @@ window.thumbnailGenerator = async () => {
   );
 };
 window.voiceoverScript = async () => {
+    if (!requirePro("Feature Name")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;

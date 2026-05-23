@@ -104,6 +104,59 @@
   letter-spacing:0.08em;
   color:#93c5fd;
 }
+.onboarding-card{
+
+  margin-top:28px;
+
+  margin-bottom:28px;
+
+  border:
+    1px solid rgba(59,130,246,0.35);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15,23,42,0.92),
+      rgba(2,6,23,0.92)
+    );
+
+  box-shadow:
+    0 0 40px rgba(59,130,246,0.12);
+}
+
+.section-header{
+  margin-bottom:20px;
+}
+
+.section-header p{
+  color:#94a3b8;
+  margin-top:6px;
+}
+
+.input-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(240px,1fr));
+
+  gap:16px;
+
+  margin-bottom:20px;
+}
+
+.input-grid label{
+
+  display:block;
+
+  margin-bottom:8px;
+
+  color:#cbd5e1;
+
+  font-weight:700;
+
+  font-size:14px;
+}
     .template-grid{
 
       display:grid;
@@ -876,8 +929,99 @@
         </button>
 
       </div>
+      </div>
 
+
+<div class="card onboarding-card">
+
+  <div class="section-header">
+    <h2>🚀 Creator Onboarding</h2>
+
+    <p>
+      Personalize your creator workflow instantly.
+    </p>
+  </div>
+
+  <div class="input-grid">
+
+    <div>
+      <label>Creator Type</label>
+
+      <select id="creatorType">
+
+        <option value="faceless">
+          Faceless Creator
+        </option>
+
+        <option value="story">
+          Storytelling Creator
+        </option>
+
+        <option value="fitness">
+          Fitness Creator
+        </option>
+
+        <option value="money">
+          Money Creator
+        </option>
+
+        <option value="animal">
+          Animal Creator
+        </option>
+
+      </select>
+    </div>
+
+    <div>
+      <label>Main Niche</label>
+
+      <input
+        id="creatorNiche"
+        placeholder="Example: AI Sports, Gym Motivation, Horror Stories"
+      />
+    </div>
+
+    <div>
+      <label>Main Goal</label>
+
+      <select id="creatorGoal">
+
+        <option value="views">
+          More Views
+        </option>
+
+        <option value="money">
+          Monetization
+        </option>
+
+        <option value="growth">
+          Audience Growth
+        </option>
+
+        <option value="brand">
+          Build a Brand
+        </option>
+
+      </select>
+    </div>
+
+  </div>
+
+  <button
+    class="primary"
+    onclick="applyOnboarding()"
+  >
+    Apply Creator Setup
+  </button>
+
+
+</div>
+
+<div class="card">
       <h3>Create Content</h3>
+      
+
+  
 
       <div class="topbar">
 
@@ -1001,14 +1145,15 @@
   class="analytics"
   onclick="channelIntelligence()"
 >
-  Channel Intelligence 🧠
+  Channel Intelligence 🧠 🔒 PRO
 </button>
 
 <button
   class="analytics"
   onclick="seriesGenerator()"
 >
-  AI Series Generator 📺
+  AI Series Generator 📺 🔒 PRO
+
 </button>
 
         <button
@@ -1046,7 +1191,7 @@
   class="secondary"
   onclick="monetizationDashboard()"
 >
-  Monetization Dashboard 💰
+  Monetization Dashboard 💰 🔒 PRO
 </button>
         <div class="section-title">PRODUCTION TOOLS</div>
 <button
@@ -1059,13 +1204,14 @@
   class="thumbnail"
   onclick="thumbnailGenerator()"
 >
-  AI Thumbnail Generator 🎨
+  AI Thumbnail Generator 🎨 🔒 PRO
+
 </button>
 <button
   class="analytics"
   onclick="voiceoverScript()"
 >
-  AI Voiceover Script 🎙️
+  AI Voiceover Script 🎙️ 🔒 PRO
 </button>
 
         <button

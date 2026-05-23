@@ -2,11 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ShortForge AI</title>
 
   <style>
@@ -27,16 +23,16 @@
 
       color:white;
 
-      min-height:100vh;
+      overflow-x:hidden;
     }
 
     .container{
-      max-width:1200px;
+      max-width:1300px;
       margin:auto;
-      padding:40px 20px;
+      padding:0 24px;
     }
 
-    .nav{
+    nav{
 
       display:flex;
 
@@ -44,57 +40,106 @@
 
       align-items:center;
 
-      margin-bottom:80px;
+      padding:28px 0;
     }
 
     .logo{
       font-size:28px;
-      font-weight:800;
+      font-weight:900;
+      letter-spacing:-1px;
     }
-.nav-links{
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-}
-    .nav a{
 
+    .nav-buttons{
+      display:flex;
+      gap:14px;
+    }
+
+    .nav-buttons a{
       text-decoration:none;
+    }
 
-      color:white;
+    button{
 
-      background:
-        linear-gradient(135deg,#3b82f6,#2563eb);
-
-      padding:14px 20px;
+      border:none;
 
       border-radius:14px;
 
+      padding:14px 22px;
+
+      font-size:15px;
+
       font-weight:700;
+
+      cursor:pointer;
+
+      transition:0.2s ease;
+    }
+
+    button:hover{
+      transform:translateY(-2px);
+    }
+
+    .primary{
+      background:
+        linear-gradient(135deg,#3b82f6,#2563eb);
+
+      color:white;
+    }
+
+    .secondary{
+      background:#111827;
+      color:white;
+      border:1px solid rgba(255,255,255,0.08);
     }
 
     .hero{
+
+      padding:
+        100px 0 120px;
+
       text-align:center;
-      padding:80px 0;
+    }
+
+    .badge{
+
+      display:inline-flex;
+
+      align-items:center;
+
+      gap:10px;
+
+      padding:10px 18px;
+
+      border-radius:999px;
+
+      background:
+        rgba(255,255,255,0.06);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      margin-bottom:28px;
+
+      color:#cbd5e1;
+
+      font-size:14px;
     }
 
     .hero h1{
 
-      font-size:72px;
+      font-size:78px;
 
-      font-weight:900;
+      line-height:1;
 
-      line-height:1.05;
+      letter-spacing:-4px;
 
-      margin-bottom:24px;
+      max-width:1000px;
+
+      margin:auto auto 28px;
     }
 
-    .gradient{
-      background:
-        linear-gradient(135deg,#60a5fa,#a78bfa);
-
-      -webkit-background-clip:text;
-
-      -webkit-text-fill-color:transparent;
+    .hero span{
+      color:#60a5fa;
     }
 
     .hero p{
@@ -103,68 +148,83 @@
 
       margin:auto;
 
-      color:#cbd5e1;
+      color:#94a3b8;
 
-      font-size:22px;
+      font-size:20px;
 
       line-height:1.7;
-
-      margin-bottom:40px;
     }
 
     .hero-buttons{
 
       display:flex;
 
+      justify-content:center;
+
       gap:18px;
 
-      justify-content:center;
+      margin-top:42px;
 
       flex-wrap:wrap;
     }
 
-    .primary-btn,
-    .secondary-btn{
+    .dashboard-preview{
 
-      text-decoration:none;
-
-      padding:18px 28px;
-
-      border-radius:18px;
-
-      font-weight:800;
-
-      font-size:18px;
-
-      transition:0.2s ease;
-    }
-
-    .primary-btn{
+      margin-top:90px;
 
       background:
-        linear-gradient(135deg,#3b82f6,#2563eb);
-
-      color:white;
-    }
-
-    .secondary-btn{
-
-      background:#111827;
+        rgba(15,23,42,0.72);
 
       border:
         1px solid rgba(255,255,255,0.08);
 
-      color:white;
+      border-radius:30px;
+
+      padding:30px;
+
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.45);
+
+      backdrop-filter:blur(18px);
     }
 
-    .primary-btn:hover,
-    .secondary-btn:hover{
-      transform:translateY(-2px);
+    .dashboard-preview img{
+      width:100%;
+      border-radius:18px;
     }
 
-    .features{
+    .section{
+      padding:100px 0;
+    }
 
-      margin-top:100px;
+    .section-title{
+
+      text-align:center;
+
+      margin-bottom:60px;
+    }
+
+    .section-title h2{
+
+      font-size:54px;
+
+      margin-bottom:16px;
+
+      letter-spacing:-2px;
+    }
+
+    .section-title p{
+
+      color:#94a3b8;
+
+      max-width:700px;
+
+      margin:auto;
+
+      line-height:1.7;
+    }
+
+    .feature-grid{
 
       display:grid;
 
@@ -177,65 +237,33 @@
     .feature-card{
 
       background:
-        rgba(15,23,42,0.75);
+        rgba(15,23,42,0.72);
 
       border:
         1px solid rgba(255,255,255,0.08);
 
-      backdrop-filter:blur(10px);
-
       border-radius:24px;
 
       padding:28px;
+
+      transition:0.2s ease;
+    }
+
+    .feature-card:hover{
+      transform:translateY(-6px);
     }
 
     .feature-card h3{
-
+      margin:18px 0 14px;
       font-size:22px;
-
-      margin-bottom:14px;
     }
 
     .feature-card p{
-
-      color:#cbd5e1;
-
-      line-height:1.7;
-    }
-
-    .section-title{
-
-      text-align:center;
-
-      font-size:42px;
-
-      font-weight:900;
-
-      margin-top:120px;
-
-      margin-bottom:20px;
-    }
-
-    .section-sub{
-
-      text-align:center;
-
       color:#94a3b8;
-
-      max-width:760px;
-
-      margin:auto;
-
       line-height:1.7;
-
-      font-size:18px;
-
-      margin-bottom:50px;
     }
 
     .pricing{
-
-      margin-top:60px;
 
       display:grid;
 
@@ -245,144 +273,144 @@
       gap:24px;
     }
 
-    .pricing-card{
+    .price-card{
 
       background:
-        rgba(15,23,42,0.8);
+        rgba(15,23,42,0.72);
 
       border:
         1px solid rgba(255,255,255,0.08);
 
       border-radius:28px;
 
-      padding:36px;
+      padding:34px;
     }
 
-    .pricing-card.pro{
+    .pro{
 
       border:
-        2px solid #3b82f6;
+        1px solid rgba(59,130,246,0.45);
 
       transform:scale(1.03);
+
+      box-shadow:
+        0 0 50px rgba(59,130,246,0.15);
     }
 
     .price{
 
-      font-size:58px;
+      font-size:64px;
 
       font-weight:900;
 
-      margin:18px 0;
+      margin:20px 0;
+    }
+
+    .price span{
+      font-size:18px;
+      color:#94a3b8;
     }
 
     ul{
-      margin-top:20px;
-      padding-left:20px;
-      line-height:2;
+      list-style:none;
+      margin-top:24px;
+    }
+
+    ul li{
+      margin-bottom:16px;
       color:#cbd5e1;
     }
-.social-proof{
-  margin-top:120px;
-}
 
-.stats-grid{
+    .testimonial-grid{
 
-  display:grid;
+      display:grid;
 
-  grid-template-columns:
-    repeat(auto-fit,minmax(240px,1fr));
+      grid-template-columns:
+        repeat(auto-fit,minmax(320px,1fr));
 
-  gap:22px;
+      gap:24px;
+    }
 
-  margin-top:50px;
-}
+    .testimonial{
 
-.stat-card{
+      background:
+        rgba(15,23,42,0.72);
 
-  background:
-    rgba(15,23,42,0.75);
+      border:
+        1px solid rgba(255,255,255,0.08);
 
-  border:
-    1px solid rgba(255,255,255,0.08);
+      border-radius:24px;
 
-  border-radius:24px;
+      padding:28px;
+    }
 
-  padding:30px;
+    .testimonial p{
+      color:#cbd5e1;
+      line-height:1.7;
+      margin-bottom:20px;
+    }
 
-  text-align:center;
-}
+    .testimonial strong{
+      font-size:15px;
+    }
 
-.stat-card h2{
+    .cta{
 
-  font-size:52px;
+      text-align:center;
 
-  margin-bottom:10px;
+      padding:
+        120px 0;
+    }
 
-  color:#60a5fa;
-}
+    .cta h2{
 
-.stat-card p{
-  color:#cbd5e1;
-}
+      font-size:64px;
 
-.testimonial-grid{
+      line-height:1.1;
 
-  display:grid;
+      margin-bottom:20px;
+    }
 
-  grid-template-columns:
-    repeat(auto-fit,minmax(280px,1fr));
+    .cta p{
 
-  gap:24px;
+      color:#94a3b8;
 
-  margin-top:50px;
-}
+      max-width:700px;
 
-.testimonial-card{
+      margin:auto auto 34px;
 
-  background:
-    rgba(15,23,42,0.75);
+      line-height:1.7;
+    }
 
-  border:
-    1px solid rgba(255,255,255,0.08);
+    footer{
 
-  border-radius:24px;
+      padding:40px 0;
 
-  padding:28px;
-
-  line-height:1.8;
-}
-
-.testimonial-card strong{
-
-  display:block;
-
-  margin-top:18px;
-
-  color:#60a5fa;
-}
-    .footer{
-
-      margin-top:120px;
+      border-top:
+        1px solid rgba(255,255,255,0.06);
 
       text-align:center;
 
       color:#64748b;
-
-      padding-bottom:40px;
     }
 
     @media(max-width:768px){
 
       .hero h1{
-        font-size:48px;
+        font-size:52px;
       }
 
-      .hero p{
-        font-size:18px;
+      .section-title h2{
+        font-size:40px;
       }
 
-      .section-title{
-        font-size:34px;
+      .cta h2{
+        font-size:42px;
+      }
+
+      nav{
+        flex-direction:column;
+        gap:20px;
       }
     }
 
@@ -393,198 +421,270 @@
 
   <div class="container">
 
-    <div class="nav">
+    <nav>
+
       <div class="logo">
         🚀 ShortForge AI
       </div>
 
-      <div class="nav-links">
-  <a href="/pricing.html">
-    Pricing
-  </a>
+      <div class="nav-buttons">
 
-  <a href="/dashboard.html">
-    Open Dashboard
-  </a>
-</div>
-    </div>
+        <a href="/pricing.html">
+          <button class="secondary">
+            Pricing
+          </button>
+        </a>
 
-    <div class="hero">
+        <a href="/dashboard.html">
+          <button class="primary">
+            Open Dashboard
+          </button>
+        </a>
+
+      </div>
+
+    </nav>
+
+    <section class="hero">
+
+      <div class="badge">
+        ⚡ AI-Powered Creator Operating System
+      </div>
 
       <h1>
         Build Viral Content With
-        <span class="gradient">
-          AI Creator Tools
-        </span>
+        <span>AI Creator Tools</span>
       </h1>
 
       <p>
-        ShortForge AI helps creators generate viral short-form content,
-        hooks, thumbnails, monetization strategies, posting systems,
-        branding ideas, and full creator workflows in seconds.
+        ShortForge AI helps creators generate viral scripts,
+        thumbnails, hooks, analytics, monetization plans,
+        upload schedules, and full creator systems in seconds.
       </p>
 
       <div class="hero-buttons">
 
-        <a
-          class="primary-btn"
-          href="/dashboard.html"
-        >
-          Launch App
+        <a href="/dashboard.html">
+          <button class="primary">
+            Start Creating
+          </button>
         </a>
 
-        <a
-          class="secondary-btn"
-          href="/dashboard.html"
-        >
-          View Dashboard
+        <a href="/pricing.html">
+          <button class="secondary">
+            View Pricing
+          </button>
         </a>
 
       </div>
 
-    </div>
+      <div class="dashboard-preview">
 
-    <div class="features">
+        <img
+          src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop"
+        />
 
-      <div class="feature-card">
-        <h3>🔥 Viral Script Generator</h3>
-
-        <p>
-          Generate high-retention TikTok, Reels, and Shorts scripts designed for maximum engagement.
-        </p>
       </div>
 
-      <div class="feature-card">
-        <h3>📈 Trend Intelligence</h3>
+    </section>
+
+    <section class="section">
+
+      <div class="section-title">
+
+        <h2>
+          Everything A Creator Needs
+        </h2>
 
         <p>
-          Discover viral content opportunities, niche gaps, monetization ideas, and growth strategies.
+          Replace dozens of creator tools with one AI-powered
+          content operating system.
         </p>
+
       </div>
 
-      <div class="feature-card">
-        <h3>🎬 Production Workflow</h3>
+      <div class="feature-grid">
 
-        <p>
-          Build thumbnails, scene plans, voiceovers, posting schedules, and creator systems automatically.
-        </p>
-      </div>
-
-    </div>
-
-    <div class="section-title">
-      Built For Modern Creators
-    </div>
-
-    <div class="section-sub">
-      Whether you're building a faceless AI brand, growing a YouTube Shorts page,
-      scaling TikTok content, or creating monetized creator businesses —
-      ShortForge gives you the operating system.
-    </div>
-
-    <div class="section-title">
-      Pricing
-    </div>
-
-    <div class="pricing">
-
-      <div class="pricing-card">
-
-        <h3>Free</h3>
-
-        <div class="price">
-          $0
+        <div class="feature-card">
+          <h3>🔥 Viral Script Generator</h3>
+          <p>
+            Generate high-retention TikTok and Shorts scripts instantly.
+          </p>
         </div>
 
-        <ul>
-          <li>25 generations</li>
-          <li>Core AI tools</li>
-          <li>Workspace system</li>
-          <li>Saved scripts</li>
-        </ul>
-
-      </div>
-
-      <div class="pricing-card pro">
-
-        <h3>Pro</h3>
-
-        <div class="price">
-          $19
+        <div class="feature-card">
+          <h3>📈 Trend Dashboard</h3>
+          <p>
+            Discover trends, niches, and viral opportunities before competitors.
+          </p>
         </div>
 
-        <ul>
-          <li>Unlimited generations</li>
-          <li>Advanced creator tools</li>
-          <li>Future AI image tools</li>
-          <li>Priority features</li>
-        </ul>
+        <div class="feature-card">
+          <h3>🎨 Thumbnail AI</h3>
+          <p>
+            Create clickable thumbnail concepts and cinematic prompts.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <h3>🧠 Creator Intelligence</h3>
+          <p>
+            Analyze channels, branding, audience growth, and monetization.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <h3>📅 Upload Planner</h3>
+          <p>
+            Plan content schedules and organize creator workflows.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <h3>💰 Monetization Systems</h3>
+          <p>
+            Build revenue strategies for creators, affiliates, and brands.
+          </p>
+        </div>
 
       </div>
 
-    </div>
-<section class="social-proof">
+    </section>
 
-  <div class="section-title">
-    Trusted By Modern Creators
-  </div>
+    <section class="section">
 
-  <div class="section-sub">
-    Built for TikTok creators, YouTube Shorts channels,
-    faceless brands, AI content pages, and creator businesses.
-  </div>
+      <div class="section-title">
 
-  <div class="stats-grid">
+        <h2>
+          Pricing
+        </h2>
 
-    <div class="stat-card">
-      <h2>10K+</h2>
-      <p>AI Content Ideas Generated</p>
-    </div>
+        <p>
+          Start free. Upgrade when you're ready to scale.
+        </p>
 
-    <div class="stat-card">
-      <h2>500+</h2>
-      <p>Creator Workflows Built</p>
-    </div>
+      </div>
 
-    <div class="stat-card">
-      <h2>24/7</h2>
-      <p>AI Creator Assistance</p>
-    </div>
+      <div class="pricing">
 
-  </div>
+        <div class="price-card">
 
-  <div class="testimonial-grid">
+          <h3>Free</h3>
 
-    <div class="testimonial-card">
+          <div class="price">
+            $0
+          </div>
+
+          <ul>
+            <li>✓ Limited generations</li>
+            <li>✓ Core creator tools</li>
+            <li>✓ Saved scripts</li>
+            <li>✓ Workspaces</li>
+          </ul>
+
+        </div>
+
+        <div class="price-card pro">
+
+          <h3>Pro</h3>
+
+          <div class="price">
+            $19
+            <span>/month</span>
+          </div>
+
+          <ul>
+            <li>✓ Unlimited generations</li>
+            <li>✓ Premium AI tools</li>
+            <li>✓ Monetization dashboards</li>
+            <li>✓ Thumbnail systems</li>
+            <li>✓ Future AI features</li>
+          </ul>
+
+          <div style="margin-top:28px;">
+
+            <a href="/pricing.html">
+              <button class="primary" style="width:100%;">
+                Upgrade To Pro
+              </button>
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <section class="section">
+
+      <div class="section-title">
+
+        <h2>
+          What Creators Say
+        </h2>
+
+      </div>
+
+      <div class="testimonial-grid">
+
+        <div class="testimonial">
+          <p>
+            “This replaced like 5 different creator tools for me.”
+          </p>
+
+          <strong>
+            — Faceless Shorts Creator
+          </strong>
+        </div>
+
+        <div class="testimonial">
+          <p>
+            “The AI hooks and thumbnail systems are insanely good.”
+          </p>
+
+          <strong>
+            — TikTok Growth Creator
+          </strong>
+        </div>
+
+        <div class="testimonial">
+          <p>
+            “The workflow feels like a real creator operating system.”
+          </p>
+
+          <strong>
+            — YouTube Shorts Creator
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+    <section class="cta">
+
+      <h2>
+        Start Building Viral Content Today
+      </h2>
+
       <p>
-        “ShortForge helped me organize my entire Shorts workflow in one place.”
+        Join creators using AI to build faster, smarter,
+        and more scalable content systems.
       </p>
 
-      <strong>— YouTube Shorts Creator</strong>
-    </div>
+      <a href="/dashboard.html">
+        <button class="primary">
+          Launch Dashboard
+        </button>
+      </a>
 
-    <div class="testimonial-card">
-      <p>
-        “The monetization and thumbnail tools alone save me hours every week.”
-      </p>
+    </section>
 
-      <strong>— TikTok Creator</strong>
-    </div>
-
-    <div class="testimonial-card">
-      <p>
-        “Feels like an AI operating system for content creators.”
-      </p>
-
-      <strong>— Faceless Brand Builder</strong>
-    </div>
-
-  </div>
-
-</section>
-    <div class="footer">
-      © 2026 ShortForge AI • Creator Operating System
-    </div>
+    <footer>
+      © 2026 ShortForge AI — Creator OS
+    </footer>
 
   </div>
 
