@@ -2246,7 +2246,11 @@ window.renderSavedScripts = () => {
   `).join("");
 };
 async function loadSavedExports() {
-  const container = document.getElementById("savedExports");
+  const container =
+  document.getElementById("savedExports");
+
+const autoContainer =
+  document.getElementById("autoSavedExports");
 
   if (!container) return;
 
@@ -2275,38 +2279,61 @@ async function loadSavedExports() {
     return;
   }
 
-  container.innerHTML = data.map(item => `
+  const autoSaves =
+  data.filter(item =>
+    item.type === "Script" ||
+    item.type === "Tool Export"
+  );
+
+const manualSaves =
+  data.filter(item =>
+    item.type !== "Script" &&
+    item.type !== "Tool Export"
+  );
+
+function renderExportCards(items) {
+  if (!items.length) {
+    return `<div class="small-note">No exports yet.</div>`;
+  }
+
+  return items.map(item => `
     <div class="saved-script">
-      <div class="meta">${item.type} • ${new Date(item.created_at).toLocaleString()}</div>
+      <div class="meta">
+        ${item.type} • ${new Date(item.created_at).toLocaleString()}
+      </div>
+
       <strong>${item.title}</strong>
 
       <div style="margin-top:10px;color:#cbd5e1;max-height:160px;overflow:hidden;">
         ${item.content.replace(/\n/g, "<br>").slice(0, 1200)}
       </div>
+
       <div class="saved-actions">
-  <button
-    class="copy-btn"
-    onclick="openSavedExport('${item.id}')"
-  >
-    Open
-  </button>
+        <button class="copy-btn" onclick="openSavedExport('${item.id}')">
+          Open
+        </button>
 
-  <button
-    class="copy-btn"
-    onclick="copySavedExport('${item.id}')"
-  >
-    Copy
-  </button>
+        <button class="copy-btn" onclick="copySavedExport('${item.id}')">
+          Copy
+        </button>
 
-  <button
-    class="delete-btn"
-    onclick="deleteSavedExport('${item.id}')"
-  >
-    Delete
-  </button>
-</div>
+        <button class="delete-btn" onclick="deleteSavedExport('${item.id}')">
+          Delete
+        </button>
+      </div>
     </div>
   `).join("");
+}
+
+if (autoContainer) {
+  autoContainer.innerHTML =
+    renderExportCards(autoSaves);
+}
+
+if (container) {
+  container.innerHTML =
+    renderExportCards(manualSaves);
+}
 }
 window.updateScriptStatus = (id, status) => {
   const key = `sf_saved_scripts_${currentWorkspaceId}`;
