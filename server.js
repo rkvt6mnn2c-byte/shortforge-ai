@@ -1166,58 +1166,83 @@ Make it natural, high-retention, dramatic when needed, and ready for TikTok, You
 });
 app.post("/create-checkout-session", async (req, res) => {
   try {
-console.log("CHECKOUT BODY:", req.body);
+    console.log("CHECKOUT BODY:", req.body);
 
     const session = await stripe.checkout.sessions.create({
-
       payment_method_types: ["card"],
-
       mode: "subscription",
       customer_email: req.body.email,
 
-metadata: {
-  userId: req.body.userId
-},
+      metadata: {
+        userId: req.body.userId
+      },
 
       line_items: [
         {
           price_data: {
             currency: "usd",
-
             product_data: {
               name: "ShortForge AI Pro"
             },
-
             unit_amount: 1900,
-
             recurring: {
               interval: "month"
             }
           },
-
           quantity: 1
         }
       ],
 
       success_url:
-  `${req.headers.origin}/dashboard.html?checkout=success`,
+        `${req.headers.origin}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
 
       cancel_url:
         `${req.headers.origin}/pricing.html`
-
     });
-console.log("CHECKOUT SESSION CREATED:", session.id);
+
+    console.log("CHECKOUT SESSION CREATED:", session.id);
+
     res.json({
       url: session.url
     });
 
   } catch (error) {
-
-    console.error(error);
+    console.error("STRIPE CHECKOUT ERROR:", error);
 
     res.status(500).json({
       error: "Stripe checkout failed"
     });
+  }
+});
+
+app.get("/checkout-success", async (req, res) => {
+  try {
+    const sessionId = req.query.session_id;
+
+    if (!sessionId) {
+      return res.redirect("/dashboard.html?checkout=missing");
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    const userId = session.metadata?.userId;
+
+    if (session.payment_status === "paid" && userId) {
+      await supabaseAdmin
+        .from("profiles")
+        .update({
+          is_pro: true
+        })
+        .eq("id", userId);
+
+      console.log(`Checkout success upgraded user ${userId} to Pro`);
+    }
+
+    res.redirect("/dashboard.html?checkout=success");
+
+  } catch (error) {
+    console.error("CHECKOUT SUCCESS ERROR:", error);
+    res.redirect("/dashboard.html?checkout=error");
   }
 });
 app.post("/generate-image", async (req, res) => {
