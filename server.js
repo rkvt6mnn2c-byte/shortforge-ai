@@ -75,7 +75,32 @@ app.post(
         }
       }
     }
+if (
+  event.type ===
+  "customer.subscription.deleted"
+) {
+  const subscription = event.data.object;
 
+  const customerId = subscription.customer;
+
+  if (customerId) {
+    const { error } =
+      await supabaseAdmin
+        .from("profiles")
+        .update({
+          is_pro: false
+        })
+        .eq("stripe_customer_id", customerId);
+
+    if (error) {
+      console.error("Subscription downgrade failed:", error);
+    } else {
+      console.log(
+        `Downgraded customer ${customerId} after subscription cancellation`
+      );
+    }
+  }
+}
     res.json({ received: true });
   }
 );
