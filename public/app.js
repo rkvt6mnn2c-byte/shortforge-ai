@@ -1709,6 +1709,78 @@ window.saveExport = async (type = "General Export") => {
 
   showToast("Export saved!");
 };
+window.openSavedExport = async (id) => {
+
+  const { data, error } =
+    await supabaseClient
+      .from("saved_exports")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+  if (error || !data) {
+    showToast("Failed to open export");
+    return;
+  }
+
+  lastGenerated = data.content;
+
+  const output =
+    document.getElementById("output");
+
+  if (output) {
+    output.innerHTML =
+      data.content.replace(/\n/g, "<br>");
+  }
+
+  showToast("Export opened!");
+};
+
+window.copySavedExport = async (id) => {
+
+  const { data, error } =
+    await supabaseClient
+      .from("saved_exports")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+  if (error || !data) {
+    showToast("Copy failed");
+    return;
+  }
+
+  navigator.clipboard.writeText(
+    data.content
+  );
+
+  showToast("Copied export!");
+};
+
+window.deleteSavedExport = async (id) => {
+
+  const confirmed =
+    confirm(
+      "Delete this saved export?"
+    );
+
+  if (!confirmed) return;
+
+  const { error } =
+    await supabaseClient
+      .from("saved_exports")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+    showToast("Delete failed");
+    return;
+  }
+
+  showToast("Export deleted!");
+
+  loadSavedExports();
+};
 window.saveScript = async () => {
 
   if (!lastGenerated)
@@ -2183,6 +2255,28 @@ async function loadSavedExports() {
       <div style="margin-top:10px;color:#cbd5e1;max-height:160px;overflow:hidden;">
         ${item.content.replace(/\n/g, "<br>").slice(0, 1200)}
       </div>
+      <div class="saved-actions">
+  <button
+    class="copy-btn"
+    onclick="openSavedExport('${item.id}')"
+  >
+    Open
+  </button>
+
+  <button
+    class="copy-btn"
+    onclick="copySavedExport('${item.id}')"
+  >
+    Copy
+  </button>
+
+  <button
+    class="delete-btn"
+    onclick="deleteSavedExport('${item.id}')"
+  >
+    Delete
+  </button>
+</div>
     </div>
   `).join("");
 }
