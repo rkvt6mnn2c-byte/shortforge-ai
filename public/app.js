@@ -7,12 +7,20 @@ const SUPABASE_ANON_KEY =
 const supabaseClient =
   supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_ANON_KEY
+    SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
   );
 const FREE_LIMIT = 25;
 const PRO_LIMIT = 999999;
 
 let lastGenerated = "";
+let assistantMessages = [];
 let savedScriptsCache = [];
 let currentWorkspaceId = localStorage.getItem("sf_current_workspace") || "default";
 let competitorCache = [];
@@ -171,108 +179,41 @@ const TEMPLATE_GALLERY = [
     topic: "A short viral product promo that makes a simple product feel unexpectedly useful, satisfying, and shareable."
   }
 ];
-async function updateAuthUI() {
-  const {
-    data: { session }
-  } = await supabaseClient.auth.getSession();
 
-  const authStatus = document.getElementById("authStatus");
-  const authCard = document.getElementById("authCard");
 
-  if (!authStatus) return;
 
-  if (session?.user) {
 
-  authStatus.innerText =
-    `Logged in as ${session.user.email}`;
 
-  const emailInput =
-    document.getElementById("authEmail");
-
-  const passwordInput =
-    document.getElementById("authPassword");
-
-  const signUpBtn =
-    document.querySelector('button[onclick="signUp()"]');
-
-  const signInBtn =
-    document.querySelector('button[onclick="signIn()"]');
-
-  const logoutBtn =
-    document.getElementById("logoutBtn");
-
-  if (emailInput) emailInput.style.display = "none";
-  if (passwordInput) passwordInput.style.display = "none";
-  if (signUpBtn) signUpBtn.style.display = "none";
-  if (signInBtn) signInBtn.style.display = "none";
-
-  if (logoutBtn) {
-    logoutBtn.style.display = "block";
-  }
-
-  if (authCard) {
-    authCard.style.border =
-      "1px solid rgba(34,197,94,0.35)";
-  }
-
-} else {
-
-  authStatus.innerText = "Not logged in";
-
-  const emailInput =
-    document.getElementById("authEmail");
-
-  const passwordInput =
-    document.getElementById("authPassword");
-
-  const signUpBtn =
-    document.querySelector('button[onclick="signUp()"]');
-
-  const signInBtn =
-    document.querySelector('button[onclick="signIn()"]');
-
-  const logoutBtn =
-    document.getElementById("logoutBtn");
-
-  if (emailInput) emailInput.style.display = "block";
-  if (passwordInput) passwordInput.style.display = "block";
-  if (signUpBtn) signUpBtn.style.display = "block";
-  if (signInBtn) signInBtn.style.display = "block";
-
-  if (logoutBtn) {
-    logoutBtn.style.display = "none";
-  }
-
-  if (authCard) {
-    authCard.style.border =
-      "1px solid rgba(255,255,255,0.08)";
-  }
-}
-}
+// =========================
+// AUTH SYSTEM
+// =========================
 
 window.signUp = async () => {
-  const email = document.getElementById("authEmail")?.value.trim();
-  const password = document.getElementById("authPassword")?.value.trim();
+  const email =
+    document.getElementById("authEmail")?.value.trim();
+
+  const password =
+    document.getElementById("authPassword")?.value.trim();
 
   if (!email || !password) {
     showToast("Enter email and password");
     return;
   }
 
-  const { error } = await supabaseClient.auth.signUp({
-    email,
-    password
-  });
+  const { error } =
+    await supabaseClient.auth.signUp({
+      email,
+      password
+    });
 
   if (error) {
+    console.error(error);
     showToast(error.message);
     return;
   }
 
-  showToast("Check your email to confirm signup");
-  updateAuthUI();
+  showToast("Account created!");
 };
-
 window.signIn = async () => {
   const email = document.getElementById("authEmail")?.value.trim();
   const password = document.getElementById("authPassword")?.value.trim();
@@ -293,14 +234,96 @@ window.signIn = async () => {
   }
 
   showToast("Logged in!");
-  updateAuthUI();
+  await window.updateAuthUI();
 };
+
+window.doLogin = window.signIn;
 
 window.logout = async () => {
   await supabaseClient.auth.signOut();
+
+  realProStatus = false;
+
+  updateUsageUI();
+
   showToast("Logged out");
-  updateAuthUI();
 };
+
+window.updateAuthUI = async () => {
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  const authStatus = document.getElementById("authStatus");
+  const emailInput = document.getElementById("authEmail");
+  const passwordInput = document.getElementById("authPassword");
+  const signUpBtn = document.getElementById("signUpBtn");
+  const signInBtn = document.getElementById("signInBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (!authStatus) return;
+
+  if (!session?.user) {
+    realProStatus = false;
+    currentUsage = 0;
+
+    authStatus.innerText = "Not logged in";
+
+    if (emailInput) emailInput.style.display = "block";
+    if (passwordInput) passwordInput.style.display = "block";
+    if (signUpBtn) signUpBtn.style.display = "block";
+    if (signInBtn) signInBtn.style.display = "block";
+    if (logoutBtn) logoutBtn.style.display = "none";
+
+    updateUsageUI();
+    return;
+  }
+
+  authStatus.innerText = `Logged in as ${session.user.email}`;
+
+  if (emailInput) emailInput.style.display = "none";
+  if (passwordInput) passwordInput.style.display = "none";
+  if (signUpBtn) signUpBtn.style.display = "none";
+  if (signInBtn) signInBtn.style.display = "none";
+  if (logoutBtn) logoutBtn.style.display = "block";
+
+  const response = await fetch("/me", {
+    headers: {
+      Authorization: `Bearer ${session.access_token}`
+    }
+  });
+
+  if (!response.ok) {
+    realProStatus = false;
+    currentUsage = 0;
+    updateUsageUI();
+    return;
+  }
+const profile = await response.json();
+
+realProStatus = profile.is_pro === true;
+currentUsage = profile.usage_count || 0;
+
+updateUsageUI();
+};
+  
+
+// =========================
+// AUTH LISTENER
+// =========================
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  console.log("AUTH EVENT:", event);
+
+  setTimeout(async () => {
+    await window.updateAuthUI();
+    updateUsageUI();
+
+    if (typeof loadScripts === "function") {
+      await loadScripts();
+    }
+  }, 0);
+});
 function showToast(message) {
   const toast = document.getElementById("toast");
   if (!toast) return alert(message);
@@ -563,8 +586,38 @@ window.deleteCompetitor = (id) => {
   showToast("Competitor deleted");
   renderCompetitors();
 };
+let realProStatus = false;
+
 function isProUser() {
-  return localStorage.getItem("sf_pro") === "true";
+  return realProStatus === true;
+}
+async function checkRealProStatus() {
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session?.user) {
+    realProStatus = false;
+    updateUsageUI();
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("profiles")
+      .select("is_pro")
+      .eq("id", session.user.id)
+      .single();
+
+  if (error) {
+    console.error(error);
+    realProStatus = false;
+  } else {
+    realProStatus = data?.is_pro === true;
+  }
+console.log("REAL PRO STATUS:", realProStatus);
+  updateUsageUI();
 }
 function requirePro(featureName = "This feature") {
   if (isProUser()) return true;
@@ -584,15 +637,74 @@ function requirePro(featureName = "This feature") {
 function getGenerationLimit() {
   return isProUser() ? PRO_LIMIT : FREE_LIMIT;
 }
+let currentUsage = 0;
 function getUsageCount() {
-  return parseInt(localStorage.getItem("sf_usage_count") || "0");
+  return currentUsage || 0;
 }
 
 function incrementUsage() {
-  localStorage.setItem("sf_usage_count", getUsageCount() + 1);
   updateUsageUI();
 }
+function updateDashboardStats() {
+  const totalScriptsStat =
+    document.getElementById("totalScriptsStat");
 
+  const generationCountStat =
+    document.getElementById("generationCountStat");
+
+  const uploadStreakStat =
+    document.getElementById("uploadStreakStat");
+
+  const viralAverageStat =
+    document.getElementById("viralAverageStat");
+
+  if (totalScriptsStat) {
+    totalScriptsStat.innerText =
+      savedScriptsCache.length;
+  }
+
+  if (generationCountStat) {
+    generationCountStat.innerText =
+      getUsageCount();
+  }
+
+  if (uploadStreakStat) {
+    const plannedCount =
+      savedScriptsCache.filter(
+        script => script.plannedAt
+      ).length;
+
+    uploadStreakStat.innerText =
+      plannedCount;
+  }
+
+  if (viralAverageStat) {
+    const scores =
+      savedScriptsCache
+        .map(script => {
+          const match =
+            script.content?.match(
+              /VIRAL_SCORE:\s*(\d{1,3})/i
+            );
+
+          return match
+            ? parseInt(match[1], 10)
+            : null;
+        })
+        .filter(score => score !== null);
+
+    const average =
+      scores.length
+        ? Math.round(
+            scores.reduce((a, b) => a + b, 0) /
+            scores.length
+          )
+        : 0;
+
+    viralAverageStat.innerText =
+      `${average}%`;
+  }
+}
 function updateUsageUI() {
   const usageText = document.getElementById("usageText");
   const usageBadge = document.getElementById("usageBadge");
@@ -600,7 +712,9 @@ function updateUsageUI() {
   if (!usageText || !usageBadge) return;
 
   const used = getUsageCount();
-  const remaining = Math.max(0, getGenerationLimit() - used);
+  const remaining = isProUser()
+  ? PRO_LIMIT
+  : Math.max(0, FREE_LIMIT - used);
 
   usageText.innerText = isProUser()
   ? `Pro Plan Active • ${used} generations used`
@@ -634,38 +748,23 @@ window.toggleTheme = () => {
 
   showToast(`Theme changed to ${currentTheme}`);
 };
-window.showUpgradeMessage = async () => {
+window.showUpgradeMessage = () => {
 
-  try {
-    showToast("Opening Stripe checkout...");
+  const modal =
+    document.getElementById("upgradeModal");
 
-    const res = await fetch("/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
+  if (modal) {
+    modal.style.display = "flex";
+  }
+};
 
-    const data = await res.json();
+window.closeUpgradeModal = () => {
 
-    if (!res.ok || !data.url) {
-      throw new Error(data.error || "Checkout failed");
-    }
+  const modal =
+    document.getElementById("upgradeModal");
 
-    window.location.href = data.url;
-
-  } catch (error) {
-    console.error(error);
-
-    const wantsDemo = confirm(
-      "Stripe checkout is not fully connected yet.\n\nUse demo Pro mode for testing?"
-    );
-
-    if (!wantsDemo) return;
-
-    localStorage.setItem("sf_pro", "true");
-    updateUsageUI();
-    showToast("🚀 Demo Pro Mode Activated");
+  if (modal) {
+    modal.style.display = "none";
   }
 };
 
@@ -681,39 +780,48 @@ window.usePromptPreset = (presetName) => {
 };
 
 function renderViralScore(text) {
-  const scoreMatch = text.match(/VIRAL_SCORE:\s*(\d{1,3})/i);
+  const match = text.match(/VIRAL_SCORE:\s*(\d+(\.\d+)?)(\s*\/\s*(10|100))?/i);
 
-  if (!scoreMatch) return text;
+  if (!match) return text;
 
-  const score = Math.min(100, Math.max(0, parseInt(scoreMatch[1], 10)));
+  const raw = parseFloat(match[1]);
+  const scale = match[4] ? parseInt(match[4], 10) : 100;
 
-  let label = "Needs Work";
-  let className = "score-low";
+  const percent =
+    scale === 10 && raw <= 10
+      ? raw * 10
+      : raw;
 
-  if (score >= 80) {
-    label = "Viral Potential";
-    className = "score-high";
-  } else if (score >= 60) {
-    label = "Strong";
-    className = "score-mid";
-  }
+  const display =
+    scale === 10 && raw <= 10
+      ? `${raw}/10`
+      : `${Math.round(percent)}/100`;
 
-  const scoreHTML = `
+  const label =
+    percent >= 80 ? "Viral Potential" :
+    percent >= 60 ? "Strong" :
+    "Needs Work";
+
+  const color =
+    percent >= 80 ? "#22c55e" :
+    percent >= 60 ? "#f59e0b" :
+    "#ef4444";
+
+  const cleanPercent =
+    Math.min(100, Math.max(0, percent));
+
+  return text.replace(match[0], `
     <div class="viral-score-card">
       <div class="viral-score-top">
         <span>Viral Score</span>
-        <strong>${score}/100</strong>
+        <strong>${display}</strong>
       </div>
 
-      <div class="viral-score-bar">
-        <div class="viral-score-fill ${className}" style="width:${score}%"></div>
-      </div>
+      <div style="width:100%;height:18px;background:linear-gradient(90deg, ${color} 0% ${cleanPercent}%, #1e293b ${cleanPercent}% 100%);border-radius:999px;margin:18px 0;"></div>
 
       <div class="viral-score-label">${label}</div>
     </div>
-  `;
-
-  return text.replace(/VIRAL_SCORE:\s*\d{1,3}(\/100)?/i, scoreHTML);
+  `);
 }
 
 function formatOutput(text) {
@@ -901,6 +1009,8 @@ window.generate = async () => {
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
+  const creatorMemory =
+  localStorage.getItem("sf_creator_memory") || "";
 
   if (!topic) {
     showToast("Enter a topic first");
@@ -908,14 +1018,40 @@ window.generate = async () => {
   }
 
   const ok = await postTool(
-    "/generate",
-    { topic, mode, goal },
+  "/generate",
+  {
+    topic,
+    mode,
+    goal,
+    creatorMemory
+  },
     "⏳ Generating viral content...",
     "Generated!",
     "Generation failed"
   );
+if (ok) {
 
-  if (ok) incrementUsage();
+  const {
+  data: { session }
+} = await supabaseClient.auth.getSession();
+
+const response =
+  await fetch("/me", {
+    headers: {
+      Authorization: `Bearer ${session.access_token}`
+    }
+  });
+
+  const profile =
+    await response.json();
+
+  localStorage.setItem(
+    "sf_usage_count",
+    profile.usage_count || 0
+  );
+
+  updateUsageUI();
+}
 };
 
 window.trendDashboard = async () => {
@@ -958,6 +1094,8 @@ window.analyzeHook = async () => {
 };
 
 window.thumbnailStudio = async () => {
+
+  if (!requirePro("Thumbnail Studio")) return;
   if (!lastGenerated) return showToast("Generate content first");
 
   await postTool(
@@ -986,6 +1124,8 @@ window.brandingSuite = async () => {
 };
 
 window.analyticsDashboard = async () => {
+
+  if (!requirePro("Analytics Dashboard")) return;
   if (!lastGenerated) return showToast("Generate content first");
 
   await postTool(
@@ -1014,7 +1154,7 @@ window.channelIntelligence = async () => {
   );
 };
 window.seriesGenerator = async () => {
-    if (!requirePro("Feature Name")) return;
+    if (!requirePro("Series Generator")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -1087,7 +1227,7 @@ window.nicheFinder = async () => {
   );
 };
 window.monetizationDashboard = async () => {
-    if (!requirePro("Feature Name")) return;
+    if (!requirePro("Monetization Dashboard")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -1105,7 +1245,66 @@ window.monetizationDashboard = async () => {
     "Monetization dashboard failed"
   );
 };
+function getImageHistory() {
+  return JSON.parse(
+    localStorage.getItem("sf_image_history") || "[]"
+  );
+}
+
+function saveImageToHistory(base64Image, prompt) {
+  const history = getImageHistory();
+
+  history.unshift({
+    id: `image-${Date.now()}`,
+    image: base64Image,
+    prompt,
+    createdAt: Date.now()
+  });
+
+  localStorage.setItem(
+    "sf_image_history",
+    JSON.stringify(history.slice(0, 30))
+  );
+
+  renderImageHistory();
+}
+
+window.renderImageHistory = () => {
+  const container = document.getElementById("imageHistory");
+  if (!container) return;
+
+  const history = getImageHistory();
+
+  if (history.length === 0) {
+    container.innerHTML =
+      `<div class="planner-empty">No AI images generated yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = history.map(item => `
+    <div class="template-card">
+      <img
+        src="data:image/png;base64,${item.image}"
+        style="width:100%;border-radius:14px;margin-bottom:12px;"
+      />
+
+      <div class="meta">
+        ${new Date(item.createdAt).toLocaleString()}
+      </div>
+
+      <button
+        class="copy-btn"
+        onclick="downloadGeneratedImage('${item.image}')"
+      >
+        Download
+      </button>
+    </div>
+  `).join("");
+};
 window.generateAIImage = async () => {
+
+  if (!requirePro("AI Thumbnail Image")) return;
+
   if (!lastGenerated) {
     showToast("Generate content first");
     return;
@@ -1142,7 +1341,7 @@ window.generateAIImage = async () => {
     });
 
     const data = await res.json();
-
+saveImageToHistory(data.image, prompt);
     if (!res.ok || !data.image) {
       throw new Error(data.error || "Image failed");
     }
@@ -1199,7 +1398,7 @@ window.downloadGeneratedImage = (base64Image) => {
   document.body.removeChild(a);
 };
 window.thumbnailGenerator = async () => {
-    if (!requirePro("Feature Name")) return;
+    if (!requirePro("Thumbnail Generator")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -1218,7 +1417,7 @@ window.thumbnailGenerator = async () => {
   );
 };
 window.voiceoverScript = async () => {
-    if (!requirePro("Feature Name")) return;
+    if (!requirePro("Voiceover Script")) return;
   const topic = document.getElementById("topic").value.trim();
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
@@ -1234,6 +1433,88 @@ window.voiceoverScript = async () => {
     "🎙️ Building AI voiceover scripts...",
     "Voiceover Script ready!",
     "Voiceover script failed"
+  );
+};
+window.exportStudio = async () => {
+
+  if (!requirePro("Export Studio")) return;
+
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  
+
+  const topic =
+    document.getElementById("topic")?.value.trim();
+
+  const mode =
+    document.getElementById("mode")?.value;
+
+  const goal =
+    document.getElementById("goal")?.value;
+
+  await postTool(
+    "/export-studio",
+    {
+      topic,
+      mode,
+      goal,
+      content: lastGenerated
+    },
+    "📦 Building creator export package...",
+    "Export Studio ready!",
+    "Export Studio failed"
+  );
+};
+window.contentCalendarGenerator = async () => {
+  if (!requirePro("Content Calendar Generator")) return;
+
+  const niche =
+    document.getElementById("creatorNiche")?.value.trim() ||
+    document.getElementById("topic")?.value.trim();
+
+  const goal =
+    document.getElementById("creatorGoal")?.value ||
+    document.getElementById("goal")?.value;
+
+  if (!niche) {
+    showToast("Enter a niche or topic first");
+    return;
+  }
+
+  await postTool(
+    "/content-calendar-generator",
+    {
+      niche,
+      goal,
+      days: 30
+    },
+    "📅 Building your 30-day content calendar...",
+    "Content calendar ready!",
+    "Content calendar failed"
+  );
+};
+window.aiVideoPack = async () => {
+
+  if (!requirePro("AI Video Pack")) return;
+
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  
+
+  await postTool(
+    "/ai-video-pack",
+    {
+      content: lastGenerated
+    },
+    "🎞️ Building AI video production pack...",
+    "AI Video Pack ready!",
+    "AI video pack failed"
   );
 };
 window.videoSceneGenerator = async () => {
@@ -1284,7 +1565,23 @@ window.copyScript = async () => {
   await navigator.clipboard.writeText(lastGenerated);
   showToast("Copied!");
 };
+window.downloadPDF = () => {
+  if (!lastGenerated) {
+    showToast("Nothing to export");
+    return;
+  }
 
+  const title =
+    document.getElementById("topic")?.value.trim() ||
+    "ShortForge Creator Export";
+
+  const url =
+    `/download-pdf?title=${encodeURIComponent(title)}&content=${encodeURIComponent(lastGenerated)}`;
+
+  window.open(url, "_blank");
+
+  showToast("PDF export started");
+};
 window.downloadOutput = async () => {
   if (!lastGenerated) return showToast("Nothing to download");
 
@@ -1378,7 +1675,7 @@ window.saveScript = async () => {
 
     showToast("Saved locally!");
   }
-
+renderAnalyticsCharts();
   loadScripts();
 };
 
@@ -1444,6 +1741,7 @@ window.loadScripts = async () => {
   renderUploadPlanner();
   renderContentCalendar();
   loadCompetitors();
+  updateDashboardStats();
 };
 
   
@@ -1785,37 +2083,1475 @@ window.copySavedScript = async (id) => {
   showToast("Saved script copied!");
 };
 
-window.deleteScript = (id) => {
-  const key = `sf_saved_scripts_${currentWorkspaceId}`;
-  const scripts = savedScriptsCache.filter(s => s.id !== id);
+window.deleteScript = async (id) => {
 
-  localStorage.setItem(key, JSON.stringify(scripts));
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (session?.user) {
+
+    const { error } =
+      await supabaseClient
+        .from("scripts")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      showToast("Cloud delete failed");
+      return;
+    }
+
+  } else {
+
+    const key =
+      `sf_saved_scripts_${currentWorkspaceId}`;
+
+    const scripts =
+      savedScriptsCache.filter(
+        s => s.id !== id
+      );
+
+    localStorage.setItem(
+      key,
+      JSON.stringify(scripts)
+    );
+  }
+
   showToast("Deleted");
   loadScripts();
 };
 
 
+window.renderAnalyticsCharts = () => {
 
-window.addEventListener("load", () => {
-    const params = new URLSearchParams(window.location.search);
+  const scripts = savedScriptsCache || [];
 
-if (params.get("pro") === "true") {
+  const ideas =
+    scripts.filter(s => s.status === "Idea").length;
 
-  localStorage.setItem("sf_pro", "true");
+  const ready =
+    scripts.filter(s => s.status === "Ready to Post").length;
 
-  showToast("🚀 Pro Activated!");
+  const posted =
+    scripts.filter(s => s.status === "Posted").length;
 
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
-  );
-}
-  applyTheme();
-    ensureDefaultWorkspace();
-  renderWorkspaces();
-  renderTemplateGallery();
-  renderFavoriteTemplates();
-  updateUsageUI();
-  loadScripts();
+  const ideasEl =
+    document.getElementById("chartIdeasCount");
+
+  const readyEl =
+    document.getElementById("chartReadyCount");
+
+  const postedEl =
+    document.getElementById("chartPostedCount");
+
+  if (ideasEl) ideasEl.innerText = ideas;
+  if (readyEl) readyEl.innerText = ready;
+  if (postedEl) postedEl.innerText = posted;
+
+  const chart =
+    document.getElementById("statusChart");
+
+  if (!chart) return;
+
+  const total =
+    Math.max(ideas + ready + posted, 1);
+
+  const ideasPercent =
+    (ideas / total) * 100;
+
+  const readyPercent =
+    (ready / total) * 100;
+
+  const postedPercent =
+    (posted / total) * 100;
+    const modeCounts = {};
+const goalCounts = {};
+
+scripts.forEach(script => {
+
+  if (script.mode) {
+    modeCounts[script.mode] =
+      (modeCounts[script.mode] || 0) + 1;
+  }
+
+  if (script.goal) {
+    goalCounts[script.goal] =
+      (goalCounts[script.goal] || 0) + 1;
+  }
+
 });
+
+const modeChart =
+  document.getElementById("modeChart");
+
+const goalChart =
+  document.getElementById("goalChart");
+
+if (modeChart) {
+
+  modeChart.innerHTML = `
+    <div class="section-title">
+      CONTENT MODES
+    </div>
+
+    ${Object.entries(modeCounts).map(([mode, count]) => {
+
+      const percent =
+        (count / Math.max(scripts.length, 1)) * 100;
+
+      return `
+        <div style="margin-bottom:18px;">
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:6px;
+            color:#cbd5e1;
+          ">
+            <span>${mode}</span>
+            <span>${count}</span>
+          </div>
+
+          <div style="
+            width:100%;
+            height:14px;
+            background:#0f172a;
+            border-radius:999px;
+            overflow:hidden;
+          ">
+            <div style="
+              width:${percent}%;
+              height:100%;
+              background:linear-gradient(135deg,#3b82f6,#2563eb);
+            "></div>
+          </div>
+
+        </div>
+      `;
+
+    }).join("")}
+  `;
+}
+
+if (goalChart) {
+
+  goalChart.innerHTML = `
+    <div class="section-title">
+      CREATOR GOALS
+    </div>
+
+    ${Object.entries(goalCounts).map(([goal, count]) => {
+
+      const percent =
+        (count / Math.max(scripts.length, 1)) * 100;
+
+      return `
+        <div style="margin-bottom:18px;">
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:6px;
+            color:#cbd5e1;
+          ">
+            <span>${goal}</span>
+            <span>${count}</span>
+          </div>
+
+          <div style="
+            width:100%;
+            height:14px;
+            background:#0f172a;
+            border-radius:999px;
+            overflow:hidden;
+          ">
+            <div style="
+              width:${percent}%;
+              height:100%;
+              background:linear-gradient(135deg,#22c55e,#16a34a);
+            "></div>
+          </div>
+
+        </div>
+      `;
+
+    }).join("")}
+  `;
+}
+
+  chart.innerHTML = `
+    <div style="
+      width:100%;
+      height:28px;
+      border-radius:999px;
+      overflow:hidden;
+      display:flex;
+      margin-bottom:16px;
+      background:#0f172a;
+    ">
+
+      <div style="
+        width:${ideasPercent}%;
+        background:#f97316;
+      "></div>
+
+      <div style="
+        width:${readyPercent}%;
+        background:#3b82f6;
+      "></div>
+
+      <div style="
+        width:${postedPercent}%;
+        background:#22c55e;
+      "></div>
+
+    </div>
+
+    <div style="
+      display:flex;
+      gap:18px;
+      flex-wrap:wrap;
+      color:#cbd5e1;
+      font-size:14px;
+    ">
+      <div>🟧 Ideas</div>
+      <div>🟦 Ready</div>
+      <div>🟩 Posted</div>
+    </div>
+  `;
+};
+window.askAssistant = async () => {
+
+  const question =
+    document.getElementById("assistantInput")?.value.trim();
+
+  const output =
+    document.getElementById("assistantOutput");
+
+  if (!question) {
+    showToast("Ask the assistant a question first");
+    return;
+  }
+
+  assistantMessages.push({
+    role: "user",
+    content: question
+  });
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        Thinking...
+      </div>
+    </div>
+  `;
+
+  try {
+
+    const res = await fetch("/assistant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+body: JSON.stringify({
+  question,
+  messages: assistantMessages,
+  content: lastGenerated
+})
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Assistant failed");
+    }
+
+    assistantMessages.push({
+      role: "assistant",
+      content: data.result
+    });
+
+    output.innerHTML = assistantMessages.map(message => `
+
+      <div style="
+        margin-bottom:18px;
+        padding:14px;
+        border-radius:14px;
+        background:${
+          message.role === "user"
+            ? "rgba(59,130,246,0.15)"
+            : "rgba(255,255,255,0.05)"
+        };
+      ">
+
+        <strong>
+          ${message.role === "user" ? "You" : "ShortForge AI"}
+        </strong>
+
+        <div style="margin-top:8px;">
+          ${formatOutput(message.content)}
+        </div>
+
+      </div>
+
+    `).join("");
+
+    document.getElementById("assistantInput").value = "";
+
+    showToast("Assistant answered!");
+
+  } catch (error) {
+
+    console.error(error);
+
+    output.innerHTML = error.message;
+
+    showToast("Assistant failed");
+  }
+};
+window.applySubtitleStyle = () => {
+
+  const preview =
+    document.getElementById("subtitlePreviewText");
+
+  const style =
+    document.getElementById("subtitleStyle").value;
+
+  if (!preview) return;
+
+  preview.style.background = "transparent";
+  preview.style.padding = "0";
+  preview.style.borderRadius = "0";
+  preview.style.letterSpacing = "0";
+  preview.style.fontStyle = "normal";
+  preview.style.color = "white";
+  preview.style.textShadow =
+    "0 4px 20px rgba(0,0,0,0.8)";
+  preview.style.fontFamily =
+    "Inter, sans-serif";
+
+  switch (style) {
+
+    case "hormozi":
+
+      preview.style.color = "#facc15";
+
+      preview.style.textShadow =
+        "0 0 18px rgba(250,204,21,0.55)";
+
+      preview.style.fontWeight = "900";
+
+      break;
+
+    case "mrbeast":
+
+      preview.style.color = "#60a5fa";
+
+      preview.style.textShadow =
+        "0 0 24px rgba(96,165,250,0.7)";
+
+      preview.style.transform = "scale(1.04)";
+
+      preview.style.letterSpacing = "1px";
+
+      break;
+
+    case "cinematic":
+
+      preview.style.color = "#ffffff";
+
+      preview.style.textShadow =
+        "0 6px 40px rgba(255,255,255,0.18)";
+
+      preview.style.fontStyle = "italic";
+
+      break;
+
+    case "neon":
+
+      preview.style.color = "#22d3ee";
+
+      preview.style.textShadow =
+        `
+        0 0 10px #22d3ee,
+        0 0 20px #22d3ee,
+        0 0 40px #22d3ee
+        `;
+
+      break;
+
+    case "meme":
+
+      preview.style.color = "#ffffff";
+
+      preview.style.background = "#000000";
+
+      preview.style.padding = "16px 24px";
+
+      preview.style.borderRadius = "16px";
+
+      preview.style.textShadow =
+        "4px 4px 0px rgba(0,0,0,1)";
+
+      preview.style.letterSpacing = "1px";
+
+      break;
+
+    default:
+
+      preview.style.color = "white";
+  }
+
+  showToast("Subtitle style applied!");
+};
+window.buildSubtitleStudio = async () => {
+if (!requirePro("Subtitle Studio")) return;
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  const output =
+    document.getElementById("subtitleStudioOutput");
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        Building subtitle package...
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch("/subtitle-studio", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: lastGenerated
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Subtitle Studio failed");
+    }
+
+    output.innerHTML = formatOutput(data.result || "");
+    const previewText =
+  document.getElementById("subtitlePreviewText");
+
+const previewSection =
+  (data.result || "")
+    .match(/PREVIEW_SUBTITLES:[\s\S]*?(?=HOOK_SUBTITLES:|MAIN_SUBTITLES:|EMOTION_WORD_HIGHLIGHTS:|$)/i)?.[0] || "";
+
+const previewLines =
+  previewSection
+    .replace(/PREVIEW_SUBTITLES:/gi, "")
+    .split("\n")
+    .map(line =>
+      line
+        .trim()
+        .replace(/^[-•\d.]+\s*/, "")
+        .replace(/["“”]/g, "")
+        .trim()
+    )
+    .filter(line =>
+      line.length > 8 &&
+      line.length < 90
+    )
+    .slice(0, 8);
+
+let previewIndex = 0;
+
+if (previewText && previewLines.length > 0) {
+  previewText.innerText = previewLines[0];
+
+  setInterval(() => {
+    previewIndex =
+      (previewIndex + 1) % previewLines.length;
+
+    previewText.style.opacity = "0";
+    previewText.style.transform = "scale(0.92)";
+
+    setTimeout(() => {
+      const words =
+  previewLines[previewIndex].split(" ");
+previewText.innerHTML =
+  words.map((word, i) => `
+    <span
+      style="
+        display:inline-block;
+        margin:0 4px;
+        opacity:${i === 0 ? "1" : "0.45"};
+        color:${i === 0 ? "#facc15" : "inherit"};
+        transform:${i === 0 ? "scale(1.08)" : "scale(1)"};
+        transition:all 0.2s ease;
+      "
+    >
+      ${word}
+    </span>
+  `).join("");
+
+const canvasSubtitle =
+  document.getElementById("canvasSubtitle");
+
+if (canvasSubtitle) {
+  canvasSubtitle.innerHTML =
+    previewText.innerHTML;
+}
+
+let wordIndex = 0;
+
+const wordTimer = setInterval(() => {
+
+  const spans =
+    previewText.querySelectorAll("span");
+
+  const canvasSpans =
+    canvasSubtitle?.querySelectorAll("span") || [];
+
+  spans.forEach((span, i) => {
+
+    span.style.opacity =
+      i === wordIndex ? "1" : "0.45";
+
+    span.style.color =
+      i === wordIndex ? "#facc15" : "inherit";
+
+    span.style.transform =
+      i === wordIndex ? "scale(1.12)" : "scale(1)";
+
+    if (canvasSpans[i]) {
+
+      canvasSpans[i].style.opacity =
+        i === wordIndex ? "1" : "0.45";
+
+      canvasSpans[i].style.color =
+        i === wordIndex ? "#facc15" : "inherit";
+
+      canvasSpans[i].style.transform =
+        i === wordIndex ? "scale(1.12)" : "scale(1)";
+    }
+
+  });
+
+  wordIndex++;
+
+  if (wordIndex >= spans.length) {
+    clearInterval(wordTimer);
+  }
+
+}, 220);
+
+previewText.style.opacity = "1";
+previewText.style.transform = "scale(1)";
+
+    }, 220);
+
+  }, 1700);
+
+}
+
+    showToast("Subtitle Studio built!");
+
+  } catch (error) {
+    console.error(error);
+
+    output.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">
+          ⚠️ Subtitle Studio Failed
+        </div>
+
+        <div class="error-message">
+          ${error.message}
+        </div>
+      </div>
+    `;
+
+    showToast("Subtitle Studio failed");
+  }
+};
+window.buildFullContentPackage = async () => {
+if (!requirePro("Full Content Package")) return;
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  const output =
+    document.getElementById("fullPackageOutput");
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        Building full content package...
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch("/full-content-package", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: lastGenerated
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Full package failed");
+    }
+
+    output.innerHTML = formatOutput(data.result || "");
+
+    showToast("Full content package built!");
+
+  } catch (error) {
+    console.error(error);
+
+    output.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">
+          ⚠️ Full Package Failed
+        </div>
+
+        <div class="error-message">
+          ${error.message}
+        </div>
+      </div>
+    `;
+
+    showToast("Full package failed");
+  }
+};
+window.buildVoiceoverStudio = async () => {
+if (!requirePro("Voiceover Studio")) return;
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  const output =
+    document.getElementById("voiceoverStudioOutput");
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        Rewriting into spoken voiceover...
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch("/voiceover-rewrite", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: lastGenerated
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Voiceover rewrite failed");
+    }
+
+    output.innerHTML = formatOutput(data.result || "");
+
+    showToast("Voiceover rewritten!");
+
+  } catch (error) {
+    console.error(error);
+
+    output.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">
+          ⚠️ Voiceover Failed
+        </div>
+
+        <div class="error-message">
+          ${error.message}
+        </div>
+      </div>
+    `;
+
+    showToast("Voiceover failed");
+  }
+};
+   window.buildVideoPipeline = () => {
+
+  if (!requirePro("Full Video Pipeline")) return;
+
+  if (!lastGenerated) {
+    showToast("Generate content first");
+    return;
+  }
+
+  const output =
+    document.getElementById("videoPipelineOutput");
+
+  const sceneSection =
+    lastGenerated.match(
+      /SCENE_BREAKDOWN:[\s\S]*?(?=IMAGE_PROMPTS:|EDITING_NOTES:|CTA:|$)/i
+    )?.[0] || lastGenerated;
+
+  const scenes =
+    sceneSection
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line =>
+        line.length > 10 &&
+        line !== "SCENE_BREAKDOWN:"
+      );
+
+  output.innerHTML = `
+
+    <div class="section-title">
+      FULL AI VIDEO PIPELINE
+    </div>
+
+    <div style="
+      display:grid;
+      gap:18px;
+    ">
+
+      ${scenes.map((scene, index) => `
+
+        <div style="
+          background:#0f172a;
+          border:1px solid rgba(255,255,255,0.06);
+          border-radius:18px;
+          padding:18px;
+        ">
+
+          <div style="
+            font-weight:800;
+            margin-bottom:10px;
+            color:#60a5fa;
+          ">
+            Scene ${index + 1}
+          </div>
+
+          <div style="
+            color:#e2e8f0;
+            line-height:1.6;
+            margin-bottom:16px;
+          ">
+            ${scene}
+          </div>
+
+          <div style="
+            background:#020617;
+            border-radius:12px;
+            padding:14px;
+            color:#94a3b8;
+            font-size:14px;
+            line-height:1.5;
+          ">
+
+            <strong style="color:white;">
+              AI Video Prompt:
+            </strong>
+
+            Cinematic vertical 9:16 creator video,
+            dramatic lighting,
+            viral TikTok pacing,
+            realistic motion,
+            based on:
+            "${scene.replace(/"/g, "")}"
+
+          </div>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+  `;
+
+  showToast("Video pipeline built!");
+};
+window.addEventListener("load", async () => {
+  try {
+
+    realProStatus = false;
+
+    await window.updateAuthUI();
+
+    await checkRealProStatus();
+
+    applyTheme();
+    ensureDefaultWorkspace();
+    renderWorkspaces();
+    renderTemplateGallery();
+    renderFavoriteTemplates();
+
+    await loadScripts();
+
+    renderImageHistory();
+    renderAnalyticsCharts();
+    loadCreatorDNA();
+
+  } catch (err) {
+
+    console.error("APP LOAD ERROR:", err);
+
+    alert(err.message);
+  }
+});
+
+window.scrollToSection = (section) => {
+
+  const map = {
+    top: ".header",
+    create: ".onboarding-card",
+    output: "#output",
+    planner: "#uploadPlanner",
+    savedScripts: "#saved",
+    settings: "#authCard"
+  };
+
+  const element =
+    document.querySelector(map[section]);
+
+  if (!element) return;
+
+  element.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+};
+let draggedWorkspaceCard = null;
+
+window.startWorkspaceDrag = (event) => {
+  draggedWorkspaceCard = event.target;
+  event.target.style.opacity = "0.5";
+};
+
+window.endWorkspaceDrag = (event) => {
+  event.target.style.opacity = "1";
+};
+
+window.allowWorkspaceDrop = (event) => {
+  event.preventDefault();
+};
+
+window.dropWorkspaceCard = (event) => {
+  event.preventDefault();
+
+  if (!draggedWorkspaceCard) return;
+
+  const column = event.currentTarget;
+  column.appendChild(draggedWorkspaceCard);
+
+  draggedWorkspaceCard = null;
+
+  updateWorkspaceCounts();
+};
+window.updateWorkspaceCounts = () => {
+  document
+    .querySelectorAll(".creator-workspace-column")
+    .forEach(column => {
+      const count = column.querySelectorAll(".status-card").length;
+      const badge = column.querySelector(".workspace-count");
+
+      if (badge) {
+        badge.innerText = count;
+      }
+    });
+};
+async function buildTimelineEditor() {
+
+  if (!requirePro("AI Timeline Editor")) return;
+  const output =
+    document.getElementById("timelineEditor");
+
+  const content =
+    document.getElementById("output")
+      ?.innerText || "";
+
+  if (!content.trim()) {
+
+    showToast("Generate content first");
+
+    return;
+  }
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        Building AI timeline editor...
+      </div>
+    </div>
+  `;
+
+  const lines = content
+    .split("\n")
+    .filter(line => line.trim().length > 20)
+    .slice(0, 8);
+
+  output.innerHTML = "";
+
+  lines.forEach((line, index) => {
+
+    const duration =
+      Math.floor(Math.random() * 4) + 2;
+
+    const color =
+      [
+        "#3b82f6",
+        "#8b5cf6",
+        "#06b6d4",
+        "#22c55e",
+        "#f97316",
+        "#ec4899"
+      ][index % 6];
+
+    output.innerHTML += `
+      <div
+        style="
+          background:#020617;
+          border:1px solid rgba(255,255,255,0.06);
+          border-radius:18px;
+          padding:18px;
+          overflow:hidden;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:14px;
+            gap:12px;
+            flex-wrap:wrap;
+          "
+        >
+
+          <div
+            style="
+              font-weight:800;
+              font-size:15px;
+              color:#cbd5e1;
+            "
+          >
+            Scene ${index + 1}
+          </div>
+
+          <div
+            style="
+              background:${color};
+              color:white;
+              padding:6px 12px;
+              border-radius:999px;
+              font-size:12px;
+              font-weight:800;
+            "
+          >
+            ${duration}s
+          </div>
+
+        </div>
+
+        <div
+          style="
+            font-size:16px;
+            line-height:1.6;
+            margin-bottom:16px;
+            color:white;
+          "
+        >
+          ${line}
+        </div>
+
+        <div
+          style="
+            height:18px;
+            background:#0f172a;
+            border-radius:999px;
+            overflow:hidden;
+            position:relative;
+          "
+        >
+
+          <div
+            style="
+              width:${duration * 12}%;
+              height:100%;
+              background:${color};
+              border-radius:999px;
+              box-shadow:0 0 20px ${color};
+            "
+          ></div>
+
+        </div>
+
+        <div
+          style="
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-top:14px;
+          "
+        >
+
+          <div
+            style="
+              background:rgba(59,130,246,0.12);
+              color:#93c5fd;
+              padding:8px 12px;
+              border-radius:12px;
+              font-size:12px;
+              font-weight:700;
+            "
+          >
+            Subtitle Block
+          </div>
+
+          <div
+            style="
+              background:rgba(236,72,153,0.12);
+              color:#f9a8d4;
+              padding:8px 12px;
+              border-radius:12px;
+              font-size:12px;
+              font-weight:700;
+            "
+          >
+            Sound FX
+          </div>
+
+          <div
+            style="
+              background:rgba(34,197,94,0.12);
+              color:#86efac;
+              padding:8px 12px;
+              border-radius:12px;
+              font-size:12px;
+              font-weight:700;
+            "
+          >
+            Zoom Cut
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+  });
+
+  showToast("Timeline editor built");
+
+}
+window.buildStoryboardStudio = async function () {
+
+  if (!requirePro("AI Storyboard Studio")) return;
+  const output =
+    document.getElementById("storyboardStudio");
+
+  const content =
+    document.getElementById("output")?.innerText || "";
+
+  if (!content.trim()) {
+    showToast("Generate content first");
+    return;
+  }
+
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        Generating AI storyboard frames...
+      </div>
+    </div>
+  `;
+
+  const scenes =
+    content
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line =>
+        line.length > 25 &&
+        !line.includes(":")
+      )
+      .slice(0, 8);
+
+  output.innerHTML = scenes.map((scene, index) => `
+    <div class="template-card">
+
+      <div
+        id="storyboardImage${index}"
+        style="
+          height:220px;
+          border-radius:18px;
+          background:linear-gradient(135deg,#1e3a8a,#7c3aed);
+          margin-bottom:16px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          text-align:center;
+          padding:18px;
+          font-weight:900;
+          font-size:28px;
+        "
+      >
+        Generating Scene ${index + 1}...
+      </div>
+
+      <div class="meta">
+        AI Storyboard Frame
+      </div>
+
+      <strong>${scene}</strong>
+
+      <p>
+        Camera: ${index % 2 === 0 ? "slow cinematic push-in" : "fast handheld zoom"}
+      </p>
+
+      <p>
+        AI Image Prompt: vertical 9:16 cinematic frame, ${scene.replace(/"/g, "")}, dramatic lighting, viral creator style.
+      </p>
+
+    </div>
+  `).join("");
+
+  for (let i = 0; i < scenes.length; i++) {
+
+    const imageBox =
+      document.getElementById(`storyboardImage${i}`);
+
+    const prompt =
+      `Create a vertical 9:16 cinematic storyboard frame for a short-form viral video.
+      No text in the image.
+      Dramatic lighting, realistic motion, high contrast, creator-style composition.
+      Scene: ${scenes[i]}`;
+
+    try {
+
+      const res = await fetch("/generate-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.image) {
+        throw new Error(data.error || "Image failed");
+      }
+
+      imageBox.innerHTML = `
+        <img
+          src="data:image/png;base64,${data.image}"
+          style="
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            border-radius:18px;
+          "
+        />
+      `;
+
+    } catch (error) {
+
+      console.error(error);
+
+      imageBox.innerHTML = `
+        Scene ${i + 1}
+      `;
+    }
+  }
+
+  showToast("AI storyboard images built!");
+
+};
+window.startVideoPlayback = function () {
+
+  if (!requirePro("Interactive Video Playback")) return;
+  const sceneBox =
+    document.getElementById("playbackScene");
+
+  const progress =
+    document.getElementById("playbackProgress");
+
+  const timer =
+    document.getElementById("playbackTimer");
+
+  const content =
+    document.getElementById("output")
+      ?.innerText || "";
+
+  if (!content.trim()) {
+
+    showToast("Generate content first");
+
+    return;
+  }
+
+  const scenes =
+    content
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line =>
+        line.length > 20 &&
+        !line.includes(":")
+      )
+      .slice(0, 8);
+
+  if (scenes.length === 0) {
+
+    showToast("No scenes found");
+
+    return;
+  }
+
+  let currentScene = 0;
+
+  let totalSeconds = 0;
+
+  sceneBox.style.opacity = "0";
+
+  const colors = [
+    "linear-gradient(135deg,#1e3a8a,#7c3aed)",
+    "linear-gradient(135deg,#0f766e,#22c55e)",
+    "linear-gradient(135deg,#7c2d12,#f97316)",
+    "linear-gradient(135deg,#831843,#ec4899)",
+    "linear-gradient(135deg,#312e81,#06b6d4)"
+  ];
+
+  function updateScene() {
+
+    sceneBox.style.transition =
+      "all 0.35s ease";
+
+    sceneBox.style.transform =
+      "scale(0.92)";
+
+    sceneBox.style.opacity = "0";
+
+    setTimeout(() => {
+
+      sceneBox.innerHTML = `
+        <div
+          style="
+            display:flex;
+            flex-direction:column;
+            gap:18px;
+            align-items:center;
+          "
+        >
+
+          <div
+            style="
+              font-size:16px;
+              font-weight:700;
+              letter-spacing:0.08em;
+              opacity:0.7;
+            "
+          >
+            SCENE ${currentScene + 1}
+          </div>
+
+          <div>
+            ${scenes[currentScene]
+  .replace(/^\d+\.\s*/, "")
+  .split(" ")
+  .slice(0, 10)
+  .join(" ")}...
+          </div>
+
+        </div>
+      `;
+
+      const canvas =
+        document.getElementById("playbackCanvas");
+
+      if (canvas) {
+
+        canvas.style.background =
+          colors[currentScene % colors.length];
+      }
+
+      sceneBox.style.transform =
+        "scale(1)";
+
+      sceneBox.style.opacity = "1";
+
+    }, 250);
+  }
+
+  updateScene();
+
+  const playback = setInterval(() => {
+
+    totalSeconds++;
+
+    const minutes =
+      Math.floor(totalSeconds / 60);
+
+    const seconds =
+      totalSeconds % 60;
+
+    timer.innerText =
+      `${minutes}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+
+    const progressPercent =
+      ((currentScene + 1) / scenes.length) * 100;
+
+    progress.style.width =
+      `${progressPercent}%`;
+
+    currentScene++;
+
+    if (currentScene >= scenes.length) {
+
+      clearInterval(playback);
+
+      showToast("Playback finished");
+
+      return;
+    }
+
+    updateScene();
+
+  }, 2200);
+
+};
+window.saveCreatorDNA = function () {
+
+  const niche =
+    document.getElementById("memoryNiche").value.trim();
+
+  const tone =
+    document.getElementById("memoryTone").value.trim();
+
+  const hookStyle =
+    document.getElementById("memoryHookStyle").value.trim();
+
+  const audience =
+    document.getElementById("memoryAudience").value.trim();
+
+  const memory = `
+Niche: ${niche}
+Tone: ${tone}
+Hook Style: ${hookStyle}
+Audience: ${audience}
+  `.trim();
+
+  localStorage.setItem(
+    "sf_creator_memory",
+    memory
+  );
+
+  const status =
+    document.getElementById("creatorDNAStatus");
+
+  if (status) {
+
+    status.innerHTML = `
+      Creator DNA saved successfully 🧬
+    `;
+  }
+
+  showToast("Creator DNA saved");
+
+};
+window.loadCreatorDNA = function () {
+
+  const memory =
+    localStorage.getItem("sf_creator_memory");
+
+  if (!memory) return;
+
+  const nicheMatch =
+    memory.match(/Niche:\s(.+)/);
+
+  const toneMatch =
+    memory.match(/Tone:\s(.+)/);
+
+  const hookMatch =
+    memory.match(/Hook Style:\s(.+)/);
+
+  const audienceMatch =
+    memory.match(/Audience:\s(.+)/);
+
+  if (nicheMatch) {
+    document.getElementById("memoryNiche").value =
+      nicheMatch[1];
+  }
+
+  if (toneMatch) {
+    document.getElementById("memoryTone").value =
+      toneMatch[1];
+  }
+
+  if (hookMatch) {
+    document.getElementById("memoryHookStyle").value =
+      hookMatch[1];
+  }
+
+  if (audienceMatch) {
+    document.getElementById("memoryAudience").value =
+      audienceMatch[1];
+  }
+
+  const status =
+    document.getElementById("creatorDNAStatus");
+
+  if (status) {
+    status.innerHTML =
+      "Loaded saved Creator DNA 🧬";
+  }
+
+};
+function toggleSection(sectionId, arrowId){
+
+  const section =
+    document.getElementById(sectionId);
+
+  const arrow =
+    document.getElementById(arrowId);
+
+  if(!section) return;
+
+  const isHidden =
+    section.dataset.hidden === "true";
+
+  section.dataset.hidden =
+    isHidden ? "false" : "true";
+
+  section.style.display =
+    isHidden ? "contents" : "none";
+
+  if(arrow){
+    arrow.style.transform =
+      isHidden
+        ? "rotate(0deg)"
+        : "rotate(-90deg)";
+  }
+}

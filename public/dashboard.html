@@ -12,7 +12,106 @@
       padding:0;
       box-sizing:border-box;
     }
+.app-shell{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:24px;
+  max-width:1600px;
+  margin:auto;
+}
 
+.sidebar{
+  position:sticky;
+  top:24px;
+  height:calc(100vh - 48px);
+  background:rgba(15,23,42,0.82);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;
+  padding:22px;
+  box-shadow:0 18px 60px rgba(0,0,0,0.45);
+  backdrop-filter:blur(16px);
+}
+
+.sidebar-logo{
+  font-size:24px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.sidebar-sub{
+  color:#94a3b8;
+  font-size:13px;
+  margin-bottom:24px;
+}
+
+.nav-link{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:transparent;
+  color:#cbd5e1;
+  border:1px solid transparent;
+  justify-content:flex-start;
+  margin-bottom:8px;
+}
+
+.nav-link:hover{
+  background:rgba(59,130,246,0.12);
+  border-color:rgba(59,130,246,0.25);
+}
+
+.main-panel{
+  min-width:0;
+}
+
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.2fr 0.8fr;
+  gap:24px;
+  margin-bottom:28px;
+}
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:16px;
+  margin-bottom:28px;
+}
+
+.stat-card{
+  background:rgba(15,23,42,0.72);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:22px;
+  padding:20px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.32);
+}
+
+.stat-card strong{
+  font-size:28px;
+  display:block;
+  margin-bottom:6px;
+}
+
+.stat-card span{
+  color:#94a3b8;
+  font-size:14px;
+}
+
+@media(max-width:1000px){
+  .app-shell{
+    grid-template-columns:1fr;
+  }
+
+  .sidebar{
+    position:relative;
+    height:auto;
+  }
+
+  .hero-grid{
+    grid-template-columns:1fr;
+  }
+}
     body{
       font-family:Inter,Arial,sans-serif;
 
@@ -849,13 +948,188 @@
   align-items:stretch;
 }
     }
+.stat-card,
+.template-card,
+.saved-script,
+.onboarding-card,
+.output-card,
+.auth-card,
+.status-column,
+.planner-card,
+.calendar-day{
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease,
+    background 0.28s ease;
+}
 
+.stat-card:hover,
+.template-card:hover,
+.saved-script:hover,
+.onboarding-card:hover,
+.output-card:hover,
+.auth-card:hover,
+.status-column:hover,
+.planner-card:hover,
+.calendar-day:hover{
+  transform:translateY(-6px);
+  box-shadow:0 24px 60px rgba(59,130,246,0.16);
+  border-color:rgba(59,130,246,0.28);
+}
+
+button{
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+button:hover{
+  transform:translateY(-2px);
+}
+
+button:active{
+  transform:scale(0.98);
+}
+
+.generated-image{
+  animation:fadeInScale 0.5s ease;
+}
+
+@keyframes fadeInScale{
+  from{
+    opacity:0;
+    transform:scale(0.96);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+.sidebar{
+  animation:slideInLeft 0.45s ease;
+}
+
+.main-panel{
+  animation:fadeUp 0.45s ease;
+}
+
+@keyframes slideInLeft{
+  from{
+    opacity:0;
+    transform:translateX(-20px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateX(0);
+  }
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(18px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.stat-card strong{
+  background:linear-gradient(
+    135deg,
+    #60a5fa,
+    #a78bfa
+  );
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.nav-link:hover{
+  box-shadow:0 0 22px rgba(59,130,246,0.22);
+}
+.viral-score-fill{
+  min-width:4px;
+}
+
+.viral-score-fill.score-high{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.viral-score-fill.score-mid{
+  background:linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.viral-score-fill.score-low{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+.viral-score-bar{
+  width:100%;
+  height:18px;
+  background:rgba(255,255,255,0.08);
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:18px;
+}
+
+.viral-score-fill{
+  height:100%;
+  border-radius:999px;
+  transition:width 0.4s ease;
+}
   </style>
 </head>
 
 <body>
 
-  <div class="container">
+  <div class="app-shell">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      🚀 ShortForge
+    </div>
+
+    <div class="sidebar-sub">
+      Elite Creator Studio
+    </div>
+
+    <button class="nav-link" onclick="scrollToSection('top')">
+  🏠 Dashboard
+</button>
+
+<button class="nav-link" onclick="scrollToSection('create')">
+  ✍️ Generate
+</button>
+
+<button class="nav-link" onclick="scrollToSection('output')">
+  🎨 AI Images
+</button>
+
+<button class="nav-link" onclick="scrollToSection('planner')">
+  📅 Planner
+</button>
+
+<button class="nav-link" onclick="scrollToSection('savedScripts')">
+  💾 Saved Scripts
+</button>
+
+<button class="nav-link" onclick="scrollToSection('settings')">
+  ⚙️ Settings
+</button>
+
+  </aside>
+
+  <main class="main-panel">
+
+    <div class="container">
 <div class="card" id="authCard">
 
   <h2>Account</h2>
@@ -878,19 +1152,23 @@
       placeholder="Password"
     />
 
-    <button
-      class="primary"
-      onclick="signUp()"
-    >
-      Sign Up
-    </button>
+   <button
+  id="signUpBtn"
+  class="primary"
+  onclick="window.signUp()"
+>
+  Sign Up
+</button>
 
-    <button
-      class="secondary"
-      onclick="signIn()"
-    >
-      Log In
-    </button>
+<button
+  id="signInBtn"
+  class="secondary"
+  onclick="window.doLogin()"
+>
+  Log In
+</button>
+  Log In
+</button>
 
   </div>
 
@@ -904,7 +1182,7 @@
 <button
   id="logoutBtn"
   class="secondary"
-  onclick="logout()"
+  onclick="window.logout()"
   style="display:none;margin-top:14px;"
 >
   Logout
@@ -917,6 +1195,34 @@
         Create viral TikTok & Shorts content instantly
       </p>
     </div>
+    <div class="stat-grid">
+
+  <div class="stat-card">
+    <strong id="totalScriptsStat">0</strong>
+    <span>Total Scripts</span>
+  </div>
+
+  <div class="stat-card">
+    <strong id="viralAverageStat">92%</strong>
+    <span>Avg Viral Score</span>
+  </div>
+
+  <div class="stat-card">
+    <strong id="uploadStreakStat">7</strong>
+    <span>Upload Streak</span>
+  </div>
+
+  <div class="stat-card">
+    <strong id="generationCountStat">0</strong>
+    <span>AI Generations</span>
+  </div>
+
+  <div class="stat-card">
+    <strong>PRO</strong>
+    <span>Creator Tier</span>
+  </div>
+
+</div>
 
     <div class="card">
 
@@ -924,7 +1230,7 @@
 
         <div>
           <div class="usage-title">
-            Free Plan
+            <h2 id="planTitle">Free Plan</h2>
           </div>
 
           <div class="usage-sub">
@@ -1069,7 +1375,51 @@
 
 
 </div>
+<div class="card">
 
+  <h2>Creator DNA</h2>
+
+  <div class="small-note">
+    Save your creator style so ShortForge remembers your niche, tone, pacing, hooks, and audience.
+  </div>
+
+  <div class="input-grid">
+
+    <div>
+      <label>Niche</label>
+      <input id="memoryNiche" placeholder="Example: AI sports stories" />
+    </div>
+
+    <div>
+      <label>Tone</label>
+      <input id="memoryTone" placeholder="Example: dramatic, fast, emotional" />
+    </div>
+
+    <div>
+      <label>Hook Style</label>
+      <input id="memoryHookStyle" placeholder="Example: shocking first sentence" />
+    </div>
+
+    <div>
+      <label>Audience</label>
+      <input id="memoryAudience" placeholder="Example: teen sports fans" />
+    </div>
+
+  </div>
+
+  <button class="brand" onclick="saveCreatorDNA()">
+    Save Creator DNA 🧬
+  </button>
+
+  <div
+    id="creatorDNAStatus"
+    class="small-note"
+    style="margin-top:14px;"
+  >
+    No Creator DNA saved yet.
+  </div>
+
+</div>
 <div class="card">
       <h3>Create Content</h3>
       
@@ -1107,7 +1457,36 @@
 
       </div>
 
-      <h3>Prompt Library</h3>
+      <div
+  onclick="toggleSection('promptLibrarySection', 'promptLibraryArrow')"
+  style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    user-select:none;
+    margin-bottom:18px;
+  "
+>
+
+  <h2 style="margin:0;">
+    Prompt Library
+  </h2>
+
+  <div
+    id="promptLibraryArrow"
+    style="
+      font-size:20px;
+      transition:0.25s ease;
+      opacity:0.7;
+    "
+  >
+    ▼
+  </div>
+
+</div>
+
+<div id="promptLibrarySection">
 
       <div class="small-note">
         Click a preset to instantly fill the idea box.
@@ -1180,6 +1559,12 @@
           Generate
         </button>
 <div class="section-title">STRATEGY TOOLS</div>
+<button
+  class="analytics pro-locked"
+onclick="contentCalendarGenerator()"
+>
+  📅 AI Content Calendar 🔒 PRO
+</button>
         <button
           class="trend"
           onclick="trendDashboard()"
@@ -1188,21 +1573,21 @@
         </button>
 
         <button
-          class="analytics"
+          class="analytics pro-locked"
           onclick="analyticsDashboard()"
         >
-          Analytics Dashboard 📊
+          Analytics Dashboard 📊 🔒 PRO
         </button>
 
         <button
-  class="analytics"
+  class="analytics pro-locked"
   onclick="channelIntelligence()"
 >
   Channel Intelligence 🧠 🔒 PRO
 </button>
 
 <button
-  class="analytics"
+  class="analytics pro-locked"
   onclick="seriesGenerator()"
 >
   AI Series Generator 📺 🔒 PRO
@@ -1241,33 +1626,67 @@
   AI Niche Finder 💡
 </button>
 <button
-  class="secondary"
-  onclick="monetizationDashboard()"
+  class="secondary pro-locked"
+onclick="monetizationDashboard()"
 >
   Monetization Dashboard 💰 🔒 PRO
 </button>
-        <div class="section-title">PRODUCTION TOOLS</div>
+        <div
+  onclick="toggleSection('productionToolsSection', 'productionToolsArrow')"
+  style="
+  grid-column:1 / -1;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    user-select:none;
+    margin-bottom:20px;
+  "
+>
+
+  <div class="section-title" style="margin:0;">
+    PRODUCTION TOOLS
+  </div>
+
+  <div
+    id="productionToolsArrow"
+    style="
+      font-size:20px;
+      transition:0.25s ease;
+      opacity:0.7;
+      color:white;
+    "
+  >
+    ▼
+  </div>
+
+</div>
+
+<div
+  id="productionToolsSection"
+  style="display:contents;"
+>
 <button
-          class="thumbnail"
-          onclick="thumbnailStudio()"
+          class="thumbnail pro-locked"
+onclick="thumbnailStudio()"
         >
-          Thumbnail Studio 🖼️
+          Thumbnail Studio 🖼️ 🔒 PRO
         </button>
         <button
-  class="thumbnail"
-  onclick="thumbnailGenerator()"
+  class="thumbnail pro-locked"
+onclick="thumbnailGenerator()"
 >
   AI Thumbnail Generator 🎨 🔒 PRO
 
 </button>
 <button
-  class="thumbnail"
-  onclick="generateAIImage()"
+  class="thumbnail pro-locked"
+onclick="generateAIImage()"
 >
   🎨 AI Thumbnail Image 🔒 PRO
 </button>
 <button
-  class="analytics"
+  class="analytics pro-locked"
   onclick="voiceoverScript()"
 >
   AI Voiceover Script 🎙️ 🔒 PRO
@@ -1279,7 +1698,12 @@
         >
           Branding Suite 🎨
         </button>
-
+<button
+  class="export pro-locked"
+onclick="aiVideoPack()"
+>
+  🎞️ AI Video Pack 🔒 PRO
+</button>
         <button
           class="export"
           onclick="videoSceneGenerator()"
@@ -1294,12 +1718,24 @@
           CapCut Export 🎬
         </button>
 <div class="section-title">EXPORT & SAVE</div>
+<button
+  class="export pro-locked"
+onclick="exportStudio()"
+>
+  📦 Export Studio 🔒 PRO
+</button>
         <button
           class="download"
           onclick="downloadOutput()"
         >
           Download .txt
         </button>
+        <button
+  class="download"
+  onclick="downloadPDF()"
+>
+  Download PDF 📄
+</button>
 
         <button
           class="secondary"
@@ -1321,6 +1757,7 @@
         >
           Make More Viral 🔥
         </button>
+        </div>
         <div class="section-title">ACCOUNT</div>
 <button
   class="secondary"
@@ -1339,17 +1776,50 @@
     Pricing 💳
   </button>
 </a>
-        <button
-          class="logout"
-          onclick="logout()"
-        >
-          Logout
-        </button>
+        
 
       </div>
 
     </div>
+   
 
+</div>
+
+</div>
+
+
+</div>
+<div class="card">
+
+  <h2>AI Creator Assistant</h2>
+
+  <div class="small-note">
+    Ask ShortForge for strategy, rewrites, hooks, content ideas, or growth advice.
+  </div>
+
+  <div class="topbar">
+    <input
+      id="assistantInput"
+      placeholder="Ask the AI assistant anything about your content..."
+    />
+
+    <button
+      class="primary"
+      onclick="askAssistant()"
+    >
+      Ask Assistant
+    </button>
+  </div>
+
+  <div
+    id="assistantOutput"
+    class="output-box"
+    style="margin-top:18px;min-height:120px;"
+  >
+    Your assistant response will appear here...
+  </div>
+
+</div>
     <div class="card">
 
       <h2>Generated Content</h2>
@@ -1407,6 +1877,147 @@
 
   <div id="contentCalendar"></div>
 </div>
+
+<div class="card">
+
+  <h2>Analytics Charts</h2>
+
+  <div class="small-note">
+    Visual creator performance overview based on your saved scripts.
+  </div>
+
+  <div class="stat-grid">
+
+    <div class="stat-card">
+      <strong id="chartIdeasCount">0</strong>
+      <span>Ideas</span>
+    </div>
+
+    <div class="stat-card">
+      <strong id="chartReadyCount">0</strong>
+      <span>Ready to Post</span>
+    </div>
+
+    <div class="stat-card">
+      <strong id="chartPostedCount">0</strong>
+      <span>Posted</span>
+    </div>
+
+  </div>
+
+  <div
+    id="statusChart"
+    style="margin-top:24px;"
+  ></div>
+<div
+  id="modeChart"
+  style="margin-top:28px;"
+></div>
+
+<div
+  id="goalChart"
+  style="margin-top:28px;"
+></div>
+</div>
+<div class="card">
+  <h2>Creator Workspace</h2>
+
+  <div class="small-note">
+    Drag cards between sections to organize your creator workflow.
+  </div>
+
+  <div class="status-board">
+
+    <div
+  class="status-column creator-workspace-column"
+  ondragover="allowWorkspaceDrop(event)"
+  ondrop="dropWorkspaceCard(event)"
+>
+      <div class="status-heading">
+        Ideas
+        <span class="workspace-count">2</span>
+      </div>
+
+      <div
+  class="status-card"
+  draggable="true"
+  ondragstart="startWorkspaceDrag(event)"
+  ondragend="endWorkspaceDrag(event)"
+>
+        Viral hook testing
+      </div>
+
+      <div
+  class="status-card"
+  draggable="true"
+  ondragstart="startWorkspaceDrag(event)"
+  ondragend="endWorkspaceDrag(event)"
+>
+        Thumbnail concepts
+      </div>
+    </div>
+
+    <div
+  class="status-column creator-workspace-column"
+  ondragover="allowWorkspaceDrop(event)"
+  ondrop="dropWorkspaceCard(event)"
+>
+      <div class="status-heading">
+        Production
+        <span class="workspace-count">2</span>
+      </div>
+
+      <div
+  class="status-card"
+  draggable="true"
+  ondragstart="startWorkspaceDrag(event)"
+  ondragend="endWorkspaceDrag(event)"
+>
+        AI video prompts
+      </div>
+
+      <div
+  class="status-card"
+  draggable="true"
+  ondragstart="startWorkspaceDrag(event)"
+  ondragend="endWorkspaceDrag(event)"
+>
+        Voiceover drafts
+      </div>
+    </div>
+
+    <div
+  class="status-column creator-workspace-column"
+  ondragover="allowWorkspaceDrop(event)"
+  ondrop="dropWorkspaceCard(event)"
+>
+      <div class="status-heading">
+        Assets
+        <span class="workspace-count">2</span>
+      </div>
+
+      <div
+  class="status-card"
+  draggable="true"
+  ondragstart="startWorkspaceDrag(event)"
+  ondragend="endWorkspaceDrag(event)"
+>
+        Thumbnail gallery
+      </div>
+
+      <div
+  class="status-card"
+  draggable="true"
+  ondragstart="startWorkspaceDrag(event)"
+  ondragend="endWorkspaceDrag(event)"
+>
+        Export packs
+      </div>
+    </div>
+
+  </div>
+
+</div>
     <div class="card">
 
       <h2>Status Board</h2>
@@ -1422,6 +2033,456 @@
 
     </div>
 
+
+
+
+<div class="card">
+
+  <h2>AI Subtitle Studio</h2>
+
+  <div class="small-note">
+    Turn your script into short-form captions, subtitle timing, and text overlays.
+  </div>
+
+  <div class="button-row">
+
+    <button
+      class="analytics pro-locked"
+onclick="buildSubtitleStudio()"
+    >
+      Build Subtitle Studio 💬
+    </button>
+
+  </div>
+
+  <div
+    id="subtitleStudioOutput"
+    class="output-box"
+    style="margin-top:18px;min-height:120px;"
+  >
+    Your subtitle package will appear here...
+  </div>
+  <div class="topbar" style="margin-top:18px;">
+
+  <select id="subtitleStyle">
+    <option value="default">Default Bold</option>
+    <option value="hormozi">Hormozi Yellow</option>
+    <option value="mrbeast">MrBeast Pop</option>
+    <option value="cinematic">Cinematic White</option>
+    <option value="neon">Neon Glow</option>
+    <option value="meme">Meme Caption</option>
+  </select>
+
+  <button
+    class="secondary"
+    onclick="applySubtitleStyle()"
+  >
+    Apply Subtitle Style 🎨
+  </button>
+
+</div>
+  <div
+  id="subtitlePreview"
+  style="
+    margin-top:20px;
+    background:#000;
+    border-radius:24px;
+    min-height:420px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:28px;
+    border:1px solid rgba(255,255,255,0.08);
+    overflow:hidden;
+    position:relative;
+  "
+>
+  <div
+    id="subtitlePreviewText"
+    style="
+      font-size:34px;
+      font-weight:900;
+      line-height:1.2;
+      max-width:760px;
+      text-transform:uppercase;
+      text-shadow:0 4px 20px rgba(0,0,0,0.8);
+      transition:all 0.22s ease;
+      color:white;
+    "
+  >
+    Subtitle preview will appear here.
+  </div>
+</div>
+<div
+  id="videoCanvas"
+  style="
+    margin-top:24px;
+    width:100%;
+    max-width:420px;
+    height:740px;
+    background:
+      linear-gradient(
+        180deg,
+        #0f172a 0%,
+        #020617 100%
+      );
+    border-radius:38px;
+    overflow:hidden;
+    position:relative;
+    margin-left:auto;
+    margin-right:auto;
+    border:2px solid rgba(255,255,255,0.08);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.45);
+  "
+>
+
+  <div
+    id="canvasBackground"
+    style="
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(96,165,250,0.25),
+          transparent 60%
+        );
+      animation:canvasPulse 5s ease-in-out infinite;
+    "
+  ></div>
+
+  <div
+    id="canvasFakeVideo"
+    style="
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+    "
+  >
+
+    <div
+      style="
+        position:absolute;
+        width:180%;
+        height:180%;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(255,255,255,0.06),
+            transparent,
+            rgba(255,255,255,0.03)
+          );
+        animation:moveBackground 12s linear infinite;
+      "
+    ></div>
+
+  </div>
+
+  <div
+    style="
+      position:absolute;
+      top:22px;
+      left:22px;
+      right:22px;
+      display:flex;
+      justify-content:space-between;
+      color:white;
+      font-weight:700;
+      z-index:5;
+      font-size:14px;
+    "
+  >
+    <div>ShortForge LIVE</div>
+    <div>9:16</div>
+  </div>
+
+  <div
+    id="canvasSubtitle"
+    style="
+      position:absolute;
+      left:24px;
+      right:24px;
+      bottom:90px;
+      text-align:center;
+      font-size:34px;
+      font-weight:900;
+      line-height:1.15;
+      text-transform:uppercase;
+      color:white;
+      text-shadow:
+        0 4px 20px rgba(0,0,0,0.9);
+      z-index:5;
+      transition:all 0.25s ease;
+    "
+  >
+    Subtitle preview
+  </div>
+
+</div>
+</div>
+<div class="card">
+
+  <h2>AI Timeline Editor</h2>
+
+  <p>
+    Build a fake editing timeline from your generated script with scenes,
+    subtitles, pacing blocks, and sound cues.
+  </p>
+
+  <button
+  onclick="buildTimelineEditor()"
+  style="
+    color:#111827;
+    font-weight:900;
+  "
+>
+  Build Timeline Editor
+</button>
+
+  <div
+    id="timelineEditor"
+    style="
+      margin-top:24px;
+      display:grid;
+      gap:14px;
+    "
+  ></div>
+
+</div>
+<div class="card">
+
+  <h2>AI Storyboard Studio</h2>
+
+  <div class="small-note">
+    Turn your latest script into cinematic storyboard cards with fake scene thumbnails.
+  </div>
+
+  <button
+    class="thumbnail pro-locked"
+onclick="buildStoryboardStudio()"
+  >
+    Build Storyboard Studio 🎬
+  </button>
+
+  <div
+    id="storyboardStudio"
+    class="template-grid"
+    style="margin-top:24px;"
+  ></div>
+
+</div>
+<div class="card">
+
+  <h2>Interactive Video Playback</h2>
+
+  <div class="small-note">
+    Simulate a short-form video preview with scene playback, subtitles, and a moving progress bar.
+  </div>
+
+  <button
+    class="export pro-locked"
+onclick="startVideoPlayback()"
+  >
+    Start Video Playback ▶️
+  </button>
+
+  <div
+    id="playbackCanvas"
+    style="
+      margin-top:24px;
+      background:#000;
+      border-radius:28px;
+      min-height:520px;
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:28px;
+      border:1px solid rgba(255,255,255,0.08);
+    "
+  >
+
+    <div
+      id="playbackScene"
+      style="
+        font-size:42px;
+        font-weight:900;
+        line-height:1.15;
+        max-width:800px;
+        text-transform:uppercase;
+        z-index:2;
+      "
+    >
+      Playback preview will appear here.
+    </div>
+
+    <div
+      id="playbackTimer"
+      style="
+        position:absolute;
+        top:18px;
+        right:20px;
+        background:rgba(15,23,42,0.85);
+        padding:8px 12px;
+        border-radius:999px;
+        font-weight:800;
+        z-index:3;
+      "
+    >
+      0:00
+    </div>
+
+    <div
+      style="
+        position:absolute;
+        left:24px;
+        right:24px;
+        bottom:24px;
+        height:12px;
+        background:rgba(255,255,255,0.12);
+        border-radius:999px;
+        overflow:hidden;
+        z-index:3;
+      "
+    >
+      <div
+        id="playbackProgress"
+        style="
+          width:0%;
+          height:100%;
+          background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+          border-radius:999px;
+          transition:width 0.2s linear;
+        "
+      ></div>
+    </div>
+
+  </div>
+
+</div>
+<div class="card">
+  <h2>One-Click Content Package</h2>
+
+  <div class="small-note">
+    Generate a complete creator package from your latest script.
+  </div>
+
+  <div class="button-row">
+
+    <button
+      class="viral pro-locked"
+onclick="buildFullContentPackage()"
+    >
+      Build Full Content Package 🚀
+    </button>
+
+  </div>
+
+  <div
+    id="fullPackageOutput"
+    class="output-box"
+    style="margin-top:18px;min-height:120px;"
+  >
+    Your full content package will appear here...
+  </div>
+
+</div>
+<div class="card">
+
+  <h2>AI Voiceover Studio</h2>
+
+  <div class="small-note">
+    Turn your generated script into a clean voiceover workflow.
+  </div>
+
+  <div class="button-row">
+
+    <button
+      class="analytics pro-locked"
+onclick="buildVoiceoverStudio()"
+    >
+      Build Voiceover Studio 🎙️
+    </button>
+
+  </div>
+
+  <div
+    id="voiceoverStudioOutput"
+    class="output-box"
+    style="margin-top:18px;min-height:120px;"
+  >
+    Your voiceover studio will appear here...
+  </div>
+
+</div>
+<div class="card">
+  <h2>AI Video Pipeline</h2>
+
+  <div class="small-note">
+    Turn your generated script into a full AI video production workflow.
+  </div>
+
+  <div class="stat-grid">
+
+    <div class="stat-card">
+      <strong>1</strong>
+      <span>Script</span>
+    </div>
+
+    <div class="stat-card">
+      <strong>2</strong>
+      <span>Scenes</span>
+    </div>
+
+    <div class="stat-card">
+      <strong>3</strong>
+      <span>Voiceover</span>
+    </div>
+
+    <div class="stat-card">
+      <strong>4</strong>
+      <span>Video Prompts</span>
+    </div>
+
+  </div>
+
+  <div class="button-row">
+
+    <button
+      class="export pro-locked"
+onclick="buildVideoPipeline()"
+    >
+      Build Full Video Pipeline 🎞️
+    </button>
+
+  </div>
+
+  <div
+    id="videoPipelineOutput"
+    class="output-box"
+    style="margin-top:18px;min-height:120px;"
+  >
+    Your video pipeline will appear here...
+  </div>
+
+</div>
+<div class="card">
+  <h2>AI Image History</h2>
+
+  <div class="small-note">
+    Previously generated AI thumbnails and creator assets.
+  </div>
+
+  <div
+    id="imageHistory"
+    class="template-grid"
+  ></div>
+
+</div>
     <div class="card">
 
       <h2>Saved Scripts</h2>
@@ -1484,8 +2545,254 @@
     id="toast"
     class="toast"
   ></div>
+  <div
+  id="upgradeModal"
+  style="
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.72);
+    backdrop-filter:blur(10px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+    padding:20px;
+  "
+>
+
+  <div
+    style="
+      width:100%;
+      max-width:560px;
+      background:#0f172a;
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:28px;
+      padding:34px;
+      box-shadow:0 30px 80px rgba(0,0,0,0.6);
+      position:relative;
+    "
+  >
+
+    <button
+      onclick="closeUpgradeModal()"
+      style="
+        position:absolute;
+        top:16px;
+        right:16px;
+        width:42px;
+        height:42px;
+        border-radius:999px;
+        border:none;
+        background:#1e293b;
+        color:white;
+        font-size:18px;
+        cursor:pointer;
+      "
+    >
+      ✕
+    </button>
+
+    <div
+      style="
+        display:inline-block;
+        background:linear-gradient(135deg,#facc15,#f97316);
+        color:#111827;
+        font-weight:900;
+        padding:8px 14px;
+        border-radius:999px;
+        margin-bottom:18px;
+        font-size:13px;
+      "
+    >
+      MOST POPULAR
+    </div>
+
+    <h2
+      style="
+        font-size:42px;
+        margin-bottom:10px;
+      "
+    >
+      Upgrade to Pro 🚀
+    </h2>
+
+    <div
+      style="
+        color:#94a3b8;
+        line-height:1.7;
+        margin-bottom:26px;
+      "
+    >
+      Unlock premium AI creator tools, unlimited generations,
+      thumbnail AI, advanced exports, creator intelligence,
+      monetization systems, and future elite features.
+    </div>
+
+    <div
+      style="
+        display:grid;
+        gap:12px;
+        margin-bottom:28px;
+      "
+    >
+
+      <div>✅ Unlimited Script Generations</div>
+      <div>✅ AI Thumbnail Generator</div>
+      <div>✅ Export Studio</div>
+      <div>✅ Channel Intelligence</div>
+      <div>✅ Monetization Dashboard</div>
+      <div>✅ Future Pro Features</div>
+
+    </div>
+
+    <button
+      onclick="window.location.href='/pricing.html'"
+      style="
+        width:100%;
+        padding:18px;
+        border:none;
+        border-radius:18px;
+        font-size:18px;
+        font-weight:900;
+        cursor:pointer;
+        background:
+          linear-gradient(
+            135deg,
+            #facc15,
+            #f97316
+          );
+        color:#111827;
+      "
+    >
+      Upgrade Now 💎
+    </button>
+
+  </div>
+
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
+    
+  </main>
+</div>
+<style>
 
+@keyframes moveBackground {
+
+  0% {
+    transform:
+      translate(-10%, -10%)
+      rotate(0deg);
+  }
+
+  100% {
+    transform:
+      translate(-30%, -30%)
+      rotate(360deg);
+  }
+}
+
+@keyframes canvasPulse {
+
+  0% {
+    opacity:0.45;
+  }
+
+  50% {
+    opacity:0.9;
+  }
+
+  100% {
+    opacity:0.45;
+  }
+}
+@media(max-width:900px){
+
+  body{
+    padding:18px 10px;
+  }
+
+  .app-shell{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .sidebar{
+    position:relative;
+    top:0;
+    height:auto;
+    border-radius:20px;
+  }
+
+  .main-panel,
+  .container{
+    width:100%;
+    max-width:100%;
+  }
+
+  .header h1{
+    font-size:38px;
+    line-height:1.05;
+  }
+
+  .card{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .topbar,
+  .workspace-row,
+  .filter-row,
+  .usage-card{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  input,
+  select,
+  button{
+    width:100%;
+    min-width:0;
+  }
+
+  #videoCanvas{
+    height:620px !important;
+    max-width:360px !important;
+  }
+
+  #playbackCanvas{
+    min-height:430px !important;
+  }
+
+  #playbackScene,
+  #subtitlePreviewText,
+  #canvasSubtitle{
+    font-size:26px !important;
+  }
+
+}
+.pro-locked{
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 24px rgba(250,204,21,0.12);
+}
+
+.pro-locked::after{
+  content:"🔒 PRO";
+  position:absolute;
+  top:6px;
+  right:8px;
+  background:linear-gradient(135deg,#facc15,#f97316);
+  color:#111827;
+  font-size:10px;
+  font-weight:900;
+  padding:3px 7px;
+  border-radius:999px;
+}
+
+.pro-locked:hover{
+  box-shadow:0 0 34px rgba(250,204,21,0.32);
+}
+</style>
 </body>
 </html>

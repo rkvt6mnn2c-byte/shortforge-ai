@@ -10,3 +10,35 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true
   }
 });
+async function syncProStatus(){
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if(!session?.user){
+    localStorage.setItem("shortforge_pro", "false");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("is_pro")
+    .eq("id", session.user.id)
+    .single();
+
+  if(error){
+    console.error("Pro sync error:", error);
+    localStorage.setItem("shortforge_pro", "false");
+    return;
+  }
+
+  localStorage.setItem(
+    "shortforge_pro",
+    data?.is_pro === true ? "true" : "false"
+  );
+}
+
+supabaseClient.auth.onAuthStateChange(async () => {
+  await syncProStatus();
+});

@@ -5,8 +5,13 @@ const cors = require("cors");
 const path = require("path");
 const OpenAI = require("openai");
 const Stripe = require("stripe");
+const { createClient } = require("@supabase/supabase-js");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -60,9 +65,28 @@ async function runPrompt(systemPrompt, userPrompt) {
   const completion = await client.chat.completions.create({
     model: "gpt-4.1-mini",
     messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ],
+  {
+    role: "system",
+    content: `
+${systemPrompt}
+
+IMPORTANT RULES:
+- Never ask follow-up questions
+- Never say "Would you like me to proceed?"
+- Never say "Let me know if you want more"
+- Never speak conversationally
+- Never explain what you are doing
+- Output ONLY the requested creator content
+- Be direct and structured
+- Finish completely without asking anything
+`
+  },
+
+  {
+    role: "user",
+    content: userPrompt
+  }
+],
     temperature: 0.9,
     max_tokens: 2200
   });
@@ -82,10 +106,116 @@ app.get("/dashboard", (req, res) => {
 app.get("/home", (req, res) => {
   res.redirect("/dashboard.html");
 });
+app.get("/me", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
 
+    if (!authHeader) {
+      return res.status(401).json({
+        error: "No auth token"
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
+    const {
+      data: { user },
+      error: authError
+    } = await supabaseAdmin.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({
+        error: "Invalid user"
+      });
+    }
+
+    const { data: profile, error } =
+      await supabaseAdmin
+        .from("profiles")
+        .select("usage_count, usage_limit, is_pro")
+        .eq("id", user.id)
+        .single();
+
+    if (error || !profile) {
+      return res.status(404).json({
+        error: "Profile not found"
+      });
+    }
+
+    res.json(profile);
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      error: "Failed to load profile"
+    });
+  }
+});
 app.post("/generate", async (req, res) => {
   try {
-    const { topic, mode, goal } = req.body;
+    try {
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      error: "No auth token"
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+
+  const {
+    data: { user },
+    error: authError
+  } = await supabaseAdmin.auth.getUser(token)
+
+  if (authError || !user) {
+    return res.status(401).json({
+      error: "Invalid user"
+    });
+  }
+
+  const { data: profile, error: profileError } =
+    await supabaseAdmin
+  .from("profiles")
+      .select("usage_count, usage_limit, is_pro")
+      .eq("id", user.id)
+      .single();
+
+  if (profileError || !profile) {
+    return res.status(400).json({
+      error: "Profile not found"
+    });
+  }
+
+  if (
+    !profile.is_pro &&
+    profile.usage_count >= profile.usage_limit
+  ) {
+    return res.status(403).json({
+      error: "Free limit reached"
+    });
+  }
+
+  req.userProfile = profile;
+  req.userId = user.id;
+
+} catch (err) {
+
+  console.error(err);
+
+  return res.status(500).json({
+    error: "Server auth error"
+  });
+}
+    const {
+  topic,
+  mode,
+  goal,
+  creatorMemory
+} = req.body;
 
     const result = await runPrompt(
       "You are a world-class viral short-form content strategist.",
@@ -95,6 +225,8 @@ Create a viral short-form script.
 TOPIC: ${topic}
 MODE: ${mode}
 GOAL: ${goal}
+Creator Memory:
+${creatorMemory || "No creator memory provided."}
 
 Include:
 VIDEO_TITLE:
@@ -111,13 +243,257 @@ IMPROVEMENT_TIP:
 `
     );
 
-    res.json({ result });
+    if (!req.userProfile.is_pro) {
+
+  await supabaseAdmin
+  .from("profiles")
+    .update({
+      usage_count:
+        req.userProfile.usage_count + 1
+    })
+    .eq("id", req.userId);
+}
+
+res.json({
+  result,
+
+  usage_count:
+    req.userProfile.is_pro
+      ? req.userProfile.usage_count
+      : req.userProfile.usage_count + 1,
+
+  usage_limit:
+    req.userProfile.usage_limit,
+
+  is_pro:
+    req.userProfile.is_pro
+});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Generation failed" });
   }
 });
+app.post("/assistant", async (req, res) => {
+  try {
 
+    const { question, content } = req.body;
+
+    const completion =
+      await client.chat.completions.create({
+        model: "gpt-4.1-mini",
+
+        messages: [
+          {
+            role: "system",
+            content:
+              `
+              You are ShortForge AI,
+              an elite viral short-form content strategist.
+
+              Help creators grow on:
+              - TikTok
+              - YouTube Shorts
+              - Instagram Reels
+
+              Give:
+              - concise advice
+              - viral strategies
+              - hook rewrites
+              - thumbnail ideas
+              - retention tips
+              - monetization advice
+              - growth tactics
+
+              Keep responses actionable and creator-focused.
+              `
+          },
+
+          {
+            role: "user",
+            content:
+              `
+              Current generated content:
+              ${content || "None"}
+
+              User question:
+              ${question}
+              `
+          }
+        ]
+      });
+
+    res.json({
+      result:
+        completion.choices[0].message.content
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Assistant failed"
+    });
+    }
+});
+
+app.post("/voiceover-rewrite", async (req, res) => {
+  try {
+
+    const { content } = req.body;
+
+    const completion =
+      await client.chat.completions.create({
+        model: "gpt-4.1-mini",
+
+        messages: [
+          {
+            role: "system",
+            content:
+              `
+              You are an elite short-form video voiceover writer.
+
+              Rewrite the user's generated content into actual spoken narration.
+
+              Rules:
+              - Do NOT write scene directions.
+              - Do NOT write "show this" or "clip of this".
+              - Write words the creator would actually say out loud.
+              - Make it sound natural, viral, energetic, and human.
+              - Use short punchy lines.
+              - Keep it optimized for TikTok, YouTube Shorts, and Reels.
+              - Break it into voiceover segments.
+              - Include pacing notes.
+              `
+          },
+
+          {
+            role: "user",
+            content:
+              `
+              Turn this into a spoken short-form voiceover script:
+
+              ${content}
+              `
+          }
+        ]
+      });
+      
+    res.json({
+      result:
+        completion.choices[0].message.content
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Voiceover rewrite failed"
+    });
+  }
+});
+app.post("/full-content-package", async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    const result = await runPrompt(
+      "You are an elite creator operating system that builds full short-form content packages.",
+      `
+Create a complete ONE-CLICK CONTENT PACKAGE from this script:
+
+${content}
+
+Include:
+
+FULL_CONTENT_PACKAGE:
+VIDEO_TITLE:
+HOOK:
+SPOKEN_VOICEOVER_SCRIPT:
+SCENE_BREAKDOWN:
+AI_VIDEO_PROMPTS:
+AI_IMAGE_PROMPTS:
+THUMBNAIL_IDEAS:
+CAPTIONS:
+HASHTAGS:
+UPLOAD_CHECKLIST:
+BEST_POSTING_ANGLE:
+RETENTION_STRATEGY:
+CTA:
+MONETIZATION_ANGLE:
+REPURPOSING_IDEAS:
+QUALITY_CONTROL_CHECKLIST:
+
+Make it complete, copy-ready, and optimized for TikTok, YouTube Shorts, and Instagram Reels.
+`
+    );
+
+    res.json({ result });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Full content package failed"
+    });
+  }
+});
+app.post("/subtitle-studio", async (req, res) => {
+  try {
+
+    const { content } = req.body;
+
+    const result = await runPrompt(
+      "You are an elite short-form subtitle editor for TikTok, Reels, and YouTube Shorts.",
+`
+Create an AI SUBTITLE STUDIO package from this script:
+
+${content}
+
+Include:
+
+SUBTITLE_STUDIO:
+
+PREVIEW_SUBTITLES:
+Write 8 clean subtitle lines ONLY.
+Each line must be something the viewer would actually read on screen.
+Each line should be 6-12 words.
+Do NOT include editing notes.
+Do NOT include style notes.
+Do NOT include timing.
+Do NOT include emojis.
+Do NOT include instructions.
+
+HOOK_SUBTITLES:
+MAIN_SUBTITLES:
+EMOTION_WORD_HIGHLIGHTS:
+CAPCUT_SUBTITLE_STYLE:
+BEST_SUBTITLE_COLORS:
+BEST_SUBTITLE_ANIMATIONS:
+TIMING_BREAKDOWN:
+WORD_EMPHASIS:
+VIRAL_TEXT_OVERLAYS:
+SOUND_EFFECT_TEXT:
+RETENTION_TEXT_STRATEGY:
+FINAL_SUBTITLE_EXPORT_NOTES:
+
+Make the PREVIEW_SUBTITLES section clean and usable as real subtitles.
+`
+    );
+
+    res.json({
+      result
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Subtitle Studio failed"
+    });
+  }
+});
 app.post("/ideas", async (req, res) => {
   try {
     const { mode, goal } = req.body;
@@ -724,6 +1100,11 @@ app.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
 
       mode: "subscription",
+      customer_email: req.body.email,
+
+metadata: {
+  userId: req.body.userId
+},
 
       line_items: [
         {
@@ -746,7 +1127,7 @@ app.post("/create-checkout-session", async (req, res) => {
       ],
 
       success_url:
-        `${req.headers.origin}/dashboard.html?pro=true`,
+  `${req.headers.origin}/dashboard.html?checkout=success`,
 
       cancel_url:
         `${req.headers.origin}/pricing.html`
@@ -794,6 +1175,316 @@ app.post("/generate-image", async (req, res) => {
     });
   }
 });
+app.post("/ai-video-pack", async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({
+        error: "Content is required"
+      });
+    }
+
+    const result = await runPrompt(
+      "You are an elite AI video director for TikTok, Reels, and YouTube Shorts.",
+      `
+Create a complete AI VIDEO PRODUCTION PACK from this script:
+
+${content}
+
+Include:
+
+AI_VIDEO_PACK:
+VIDEO_STYLE:
+BEST_PLATFORM:
+SCENE_COUNT:
+TOTAL_DURATION:
+ASPECT_RATIO:
+VISUAL_MOOD:
+CAMERA_STYLE:
+LIGHTING_STYLE:
+EDITING_STYLE:
+
+For each scene include:
+SCENE_NUMBER:
+DURATION:
+VISUAL_DESCRIPTION:
+CHARACTER_ACTION:
+CAMERA_MOVEMENT:
+BACKGROUND:
+LIGHTING:
+MOTION_DETAILS:
+VEO_PROMPT:
+RUNWAY_PROMPT:
+KLING_PROMPT:
+PIKA_PROMPT:
+CAPCUT_EDITING_NOTES:
+
+Also include:
+VOICEOVER_SYNC:
+SOUND_EFFECTS:
+BACKGROUND_MUSIC:
+TRANSITION_PLAN:
+FINAL_EXPORT_SETTINGS:
+`
+    );
+
+    res.json({
+      success: true,
+      result
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: "AI video pack failed"
+    });
+  }
+});
+app.post("/content-calendar-generator", async (req, res) => {
+  try {
+    const {
+      niche,
+      goal,
+      days
+    } = req.body;
+
+    if (!niche) {
+      return res.status(400).json({
+        error: "Niche is required"
+      });
+    }
+
+    const result = await runPrompt(
+      "You are an elite content calendar strategist for TikTok, YouTube Shorts, and Instagram Reels.",
+      `
+Create a complete short-form content calendar.
+
+NICHE:
+${niche}
+
+GOAL:
+${goal || "growth"}
+
+DAYS:
+${days || 30}
+
+For each day include:
+
+DAY_NUMBER:
+VIDEO_TITLE:
+VIDEO_CONCEPT:
+HOOK:
+CONTENT_TYPE:
+PLATFORM:
+THUMBNAIL_IDEA:
+AI_IMAGE_PROMPT:
+AI_VIDEO_PROMPT:
+CAPTION:
+HASHTAGS:
+CTA:
+POSTING_TIME:
+WHY_THIS_WORKS:
+
+Also include:
+
+CONTENT_CALENDAR_STRATEGY:
+BEST_SERIES_IDEAS:
+REPEATING_FORMATS:
+MONETIZATION_ANGLES:
+WEEKLY_CONTENT_THEMES:
+`
+    );
+
+    res.json({
+      success: true,
+      result
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: "Content calendar generation failed"
+    });
+  }
+});
+app.post("/export-studio", async (req, res) => {
+  try {
+    const {
+      topic,
+      mode,
+      goal,
+      content
+    } = req.body;
+
+    const result = await runPrompt(
+      "You are an elite creator operations strategist who creates professional creator deliverables.",
+      `
+Create a complete EXPORT STUDIO package.
+
+TOPIC:
+${topic}
+
+MODE:
+${mode}
+
+GOAL:
+${goal}
+
+CONTENT:
+${content || "No content provided"}
+
+Include:
+
+EXPORT_STUDIO:
+CREATOR_BRIEF:
+PRODUCTION_BRIEF:
+UPLOAD_CHECKLIST:
+THUMBNAIL_BRIEF:
+VIDEO_EDITING_BRIEF:
+CAPTION_PACK:
+HASHTAG_PACK:
+SPONSOR_PITCH_ANGLE:
+CLIENT_READY_SUMMARY:
+CONTENT_REPURPOSING_PLAN:
+DAILY_EXECUTION_STEPS:
+TOOLS_NEEDED:
+FINAL_DELIVERABLES:
+QUALITY_CONTROL_CHECKLIST:
+
+Make it professional, structured, copy-ready, and useful for creators, agencies, editors, and clients.
+`
+    );
+
+    res.json({
+      success: true,
+      result
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: "Export Studio failed"
+    });
+  }
+});
+app.get("/download-pdf", (req, res) => {
+  const PDFDocument = require("pdfkit");
+
+  const title =
+    req.query.title || "ShortForge Creator Export";
+
+  const content =
+    req.query.content || "No content provided.";
+
+  res.setHeader(
+    "Content-Type",
+    "application/pdf"
+  );
+
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="shortforge-export.pdf"`
+  );
+
+  const doc = new PDFDocument({
+    margin: 50
+  });
+
+  doc.pipe(res);
+
+  doc
+    .fontSize(24)
+    .text("ShortForge AI", {
+      align: "center"
+    });
+
+  doc.moveDown();
+
+  doc
+    .fontSize(16)
+    .text(title, {
+      align: "center"
+    });
+
+  doc.moveDown(2);
+
+  doc
+    .fontSize(11)
+    .text(content, {
+      align: "left"
+    });
+
+  doc.end();
+});
+app.post(
+  "/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+
+    const sig =
+      req.headers["stripe-signature"];
+
+    let event;
+
+    try {
+
+      event =
+        stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET
+        );
+
+    } catch (err) {
+
+      console.error(err);
+
+      return res
+        .status(400)
+        .send(`Webhook Error: ${err.message}`);
+    }
+
+    if (
+      event.type ===
+      "checkout.session.completed"
+    ) {
+
+      const session =
+        event.data.object;
+
+      const userId =
+        session.metadata.userId;
+
+      if (userId) {
+
+        const { error } =
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+  is_pro: true
+})
+            .eq("id", userId);
+
+        if (error) {
+          console.error(error);
+        } else {
+          console.log(
+            `Upgraded user ${userId} to Pro`
+          );
+        }
+      }
+    }
+
+    res.json({ received: true });
+  }
+);
 app.listen(PORT, () => {
   console.log(`🚀 ShortForge AI running at http://localhost:${PORT}/dashboard.html`);
 });
