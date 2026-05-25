@@ -1020,6 +1020,7 @@ async function postTool(endpoint, body, loadingMessage, successMessage, failMess
 }
 
     lastGenerated = data.result || "";
+    autoSaveGeneration("Tool Export");
     output.innerHTML = formatOutput(lastGenerated);
     showToast(successMessage);
     return true;
@@ -1109,6 +1110,7 @@ window.generate = async () => {
     }
 
     lastGenerated = data.result || "";
+    autoSaveGeneration("Script");
     output.innerHTML = formatOutput(lastGenerated);
 
     realProStatus = data.is_pro === true;
@@ -1670,6 +1672,32 @@ window.downloadOutput = async () => {
   URL.revokeObjectURL(url);
   showToast("Download started!");
 };
+async function autoSaveGeneration(type = "Auto Saved") {
+  if (!lastGenerated) return;
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session?.user) return;
+
+  const title =
+    document.getElementById("topic")?.value.trim() ||
+    "Untitled Auto Save";
+
+  await supabaseClient
+    .from("saved_exports")
+    .insert([
+      {
+        user_id: session.user.id,
+        title,
+        type,
+        content: lastGenerated
+      }
+    ]);
+
+  loadSavedExports();
+}
 window.saveExport = async (type = "General Export") => {
   if (!lastGenerated) {
     showToast("Nothing to save");
