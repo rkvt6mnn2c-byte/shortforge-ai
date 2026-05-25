@@ -449,12 +449,26 @@
     </div>
 
   </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  async function startCheckout() {
+const SUPABASE_URL =
+  "https://swrzmuqnidomnpqxvjoj.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3cnptdXFuaWRvbW5wcXh2am9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MjAzMzUsImV4cCI6MjA5NDk5NjMzNX0.Cr9csw8f6eHwuVttve30tUbsuC0VMrmV6isZLDIyGmM";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+async function startCheckout() {
 
   const {
-  data: { session }
-} = await supabaseClient.auth.getSession();
+    data: { session }
+  } = await supabaseClient.auth.getSession();
 
   if (!session) {
     alert("Please log in first.");
@@ -479,9 +493,13 @@
 
   const data = await response.json();
 
+  if (!response.ok || !data.url) {
+    alert(data.error || "Checkout failed");
+    return;
+  }
+
   window.location.href = data.url;
 }
-
 </script>
 </body>
 </html>
