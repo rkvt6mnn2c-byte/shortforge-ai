@@ -1339,45 +1339,78 @@ app.post("/ai-video-pack", async (req, res) => {
 
     const result = await runPrompt(
       "You are an elite AI video director for TikTok, Reels, and YouTube Shorts.",
-      `
-Create a complete AI VIDEO PRODUCTION PACK from this script:
+
+`
+Create a premium AI VIDEO PRODUCTION PACK from this script:
 
 ${content}
+
+Make this feel like a professional short-form video production blueprint for AI video tools.
 
 Include:
 
 AI_VIDEO_PACK:
-VIDEO_STYLE:
+VIDEO_TITLE:
+CORE_CONCEPT:
 BEST_PLATFORM:
-SCENE_COUNT:
 TOTAL_DURATION:
 ASPECT_RATIO:
-VISUAL_MOOD:
-CAMERA_STYLE:
-LIGHTING_STYLE:
-EDITING_STYLE:
+VISUAL_STYLE:
+VIRAL_ANGLE:
+TARGET_VIEWER:
+EMOTIONAL_HOOK:
+RETENTION_STRATEGY:
 
+SCENE_BY_SCENE_PLAN:
 For each scene include:
 SCENE_NUMBER:
 DURATION:
+ON_SCREEN_ACTION:
 VISUAL_DESCRIPTION:
-CHARACTER_ACTION:
 CAMERA_MOVEMENT:
+SUBJECT_MOVEMENT:
 BACKGROUND:
 LIGHTING:
-MOTION_DETAILS:
+MOOD:
+TRANSITION_IN:
+TRANSITION_OUT:
+TEXT_OVERLAY:
+VOICEOVER_LINE:
+SOUND_EFFECT:
+MUSIC_CUE:
+
+AI_VIDEO_PROMPTS:
+For each scene include:
 VEO_PROMPT:
 RUNWAY_PROMPT:
 KLING_PROMPT:
 PIKA_PROMPT:
-CAPCUT_EDITING_NOTES:
 
-Also include:
-VOICEOVER_SYNC:
-SOUND_EFFECTS:
-BACKGROUND_MUSIC:
-TRANSITION_PLAN:
+Each AI video prompt should be:
+- cinematic
+- vertical 9:16
+- detailed
+- motion-focused
+- realistic unless the script clearly needs fantasy
+- ready to paste into AI video tools
+
+CAPCUT_EDITING_PLAN:
+OPENING_3_SECONDS:
+CUT_PATTERN:
+SUBTITLE_STYLE:
+ZOOM_EFFECTS:
+SOUND_DESIGN:
+B_ROLL_NOTES:
+PACING_NOTES:
+RETENTION_CUTS:
 FINAL_EXPORT_SETTINGS:
+
+THUMBNAIL_AND_COVER:
+COVER_FRAME:
+THUMBNAIL_TEXT:
+THUMBNAIL_IMAGE_PROMPT:
+
+FINAL_CREATOR_CHECKLIST:
 `
     );
 
