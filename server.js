@@ -17,7 +17,71 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
+app.post(
+  "/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+
+    const sig =
+      req.headers["stripe-signature"];
+
+    let event;
+
+    try {
+
+      event =
+        stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET
+        );
+
+    } catch (err) {
+
+      console.error(err);
+
+      return res
+        .status(400)
+        .send(`Webhook Error: ${err.message}`);
+    }
+
+    if (
+      event.type ===
+      "checkout.session.completed"
+    ) {
+
+      const session =
+        event.data.object;
+
+      const userId =
+        session.metadata.userId;
+
+      if (userId) {
+
+        const { error } =
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              is_pro: true
+            })
+            .eq("id", userId);
+
+        if (error) {
+          console.error(error);
+        } else {
+          console.log(
+            `Upgraded user ${userId} to Pro`
+          );
+        }
+      }
+    }
+
+    res.json({ received: true });
+  }
+);
+
 app.use(express.json());
+
 const requestCounts = new Map();
 
 function rateLimit(req, res, next) {
@@ -1423,68 +1487,7 @@ app.get("/download-pdf", (req, res) => {
 
   doc.end();
 });
-app.post(
-  "/stripe-webhook",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
 
-    const sig =
-      req.headers["stripe-signature"];
-
-    let event;
-
-    try {
-
-      event =
-        stripe.webhooks.constructEvent(
-          req.body,
-          sig,
-          process.env.STRIPE_WEBHOOK_SECRET
-        );
-
-    } catch (err) {
-
-      console.error(err);
-
-      return res
-        .status(400)
-        .send(`Webhook Error: ${err.message}`);
-    }
-
-    if (
-      event.type ===
-      "checkout.session.completed"
-    ) {
-
-      const session =
-        event.data.object;
-
-      const userId =
-        session.metadata.userId;
-
-      if (userId) {
-
-        const { error } =
-          await supabaseAdmin
-            .from("profiles")
-            .update({
-  is_pro: true
-})
-            .eq("id", userId);
-
-        if (error) {
-          console.error(error);
-        } else {
-          console.log(
-            `Upgraded user ${userId} to Pro`
-          );
-        }
-      }
-    }
-
-    res.json({ received: true });
-  }
-);
 app.listen(PORT, () => {
   console.log(`🚀 ShortForge AI running at http://localhost:${PORT}/dashboard.html`);
 });
