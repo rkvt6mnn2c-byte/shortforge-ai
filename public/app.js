@@ -1001,6 +1001,15 @@ async function postTool(endpoint, body, loadingMessage, successMessage, failMess
 }
 
 window.generate = async () => {
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    showToast("Please log in first");
+    return;
+  }
+
   if (!canGenerate()) {
     showToast("❌ Free plan limit reached");
     return;
@@ -1010,49 +1019,69 @@ window.generate = async () => {
   const mode = document.getElementById("mode").value;
   const goal = document.getElementById("goal").value;
   const creatorMemory =
-  localStorage.getItem("sf_creator_memory") || "";
+    localStorage.getItem("sf_creator_memory") || "";
 
   if (!topic) {
     showToast("Enter a topic first");
     return;
   }
 
-  const ok = await postTool(
-  "/generate",
-  {
-    topic,
-    mode,
-    goal,
-    creatorMemory
-  },
-    "⏳ Generating viral content...",
-    "Generated!",
-    "Generation failed"
-  );
-if (ok) {
+  const output = document.getElementById("output");
 
-  const {
-  data: { session }
-} = await supabaseClient.auth.getSession();
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">⏳ Generating viral content...</div>
+    </div>
+  `;
 
-const response =
-  await fetch("/me", {
-    headers: {
-      Authorization: `Bearer ${session.access_token}`
+  try {
+    const res = await fetch("/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        topic,
+        mode,
+        goal,
+        creatorMemory
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      output.innerHTML = `
+        <div class="error-box">
+          <div class="error-title">⚠️ Something went wrong</div>
+          <div class="error-message">${data.error || "Generation failed"}</div>
+        </div>
+      `;
+
+      showToast(data.error || "Generation failed");
+      return;
     }
-  });
 
-  const profile =
-    await response.json();
+    lastGenerated = data.result || "";
+    output.innerHTML = formatOutput(lastGenerated);
 
-  localStorage.setItem(
-    "sf_usage_count",
-    profile.usage_count || 0
-  );
+    realProStatus = data.is_pro === true;
+    currentUsage = data.usage_count || 0;
 
-  updateUsageUI();
-}
+    updateUsageUI();
+    updateDashboardStats();
+
+    showToast("Generated!");
+
+  } catch (err) {
+    console.error(err);
+    showToast("Generation failed");
+  }
 };
+
+  
 
 window.trendDashboard = async () => {
   const topic = document.getElementById("topic").value.trim();
