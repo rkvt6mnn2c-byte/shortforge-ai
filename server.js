@@ -1227,7 +1227,7 @@ app.get("/checkout-success", async (req, res) => {
 
     const userId = session.metadata?.userId;
 
-    if (session.payment_status === "paid" && userId) {
+if (userId) {
       await supabaseAdmin
         .from("profiles")
         .update({
