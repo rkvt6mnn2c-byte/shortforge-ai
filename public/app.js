@@ -1670,7 +1670,45 @@ window.downloadOutput = async () => {
   URL.revokeObjectURL(url);
   showToast("Download started!");
 };
+window.saveExport = async (type = "General Export") => {
+  if (!lastGenerated) {
+    showToast("Nothing to save");
+    return;
+  }
 
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session?.user) {
+    showToast("Log in to save exports");
+    return;
+  }
+
+  const title =
+    document.getElementById("topic")?.value.trim() ||
+    "Untitled Export";
+
+  const { error } =
+    await supabaseClient
+      .from("saved_exports")
+      .insert([
+        {
+          user_id: session.user.id,
+          title,
+          type,
+          content: lastGenerated
+        }
+      ]);
+
+  if (error) {
+    console.error(error);
+    showToast("Export save failed");
+    return;
+  }
+
+  showToast("Export saved!");
+};
 window.saveScript = async () => {
 
   if (!lastGenerated)
@@ -1809,6 +1847,7 @@ window.loadScripts = async () => {
   }
 
   renderSavedScripts();
+  loadSavedExports();
   renderStatusBoard();
   renderUploadPlanner();
   renderContentCalendar();
@@ -2106,7 +2145,47 @@ window.renderSavedScripts = () => {
     </div>
   `).join("");
 };
+async function loadSavedExports() {
+  const container = document.getElementById("savedExports");
 
+  if (!container) return;
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session?.user) {
+    container.innerHTML = `<div class="small-note">Log in to view saved exports.</div>`;
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("saved_exports")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    container.innerHTML = `<div class="small-note">Failed to load exports.</div>`;
+    return;
+  }
+
+  if (!data.length) {
+    container.innerHTML = `<div class="small-note">No saved exports yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = data.map(item => `
+    <div class="saved-script">
+      <div class="meta">${item.type} • ${new Date(item.created_at).toLocaleString()}</div>
+      <strong>${item.title}</strong>
+
+      <div style="margin-top:10px;color:#cbd5e1;max-height:160px;overflow:hidden;">
+        ${item.content.replace(/\n/g, "<br>").slice(0, 1200)}
+      </div>
+    </div>
+  `).join("");
+}
 window.updateScriptStatus = (id, status) => {
   const key = `sf_saved_scripts_${currentWorkspaceId}`;
 

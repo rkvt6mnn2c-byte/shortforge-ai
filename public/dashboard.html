@@ -1736,6 +1736,12 @@ onclick="exportStudio()"
           Download .txt
         </button>
         <button
+  class="secondary"
+  onclick="saveExport('AI Export')"
+>
+  Save Export 💾
+</button>
+        <button
   class="download"
   onclick="downloadPDF()"
 >
@@ -2545,7 +2551,20 @@ onclick="buildVideoPipeline()"
     </div>
 
   </div>
+<div class="card">
 
+  <h2>Saved Exports 💾</h2>
+
+  <div class="small-note">
+    Your saved AI exports, creator packs, thumbnails, and production assets.
+  </div>
+
+  <div
+    id="savedExports"
+    style="margin-top:18px;"
+  ></div>
+
+</div>
   <div
     id="toast"
     class="toast"
