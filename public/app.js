@@ -1081,7 +1081,6 @@ window.generate = async () => {
   }
 };
 
-  
 
 window.trendDashboard = async () => {
   const topic = document.getElementById("topic").value.trim();
@@ -2924,6 +2923,18 @@ window.addEventListener("load", async () => {
     realProStatus = false;
 
     await window.updateAuthUI();
+    const params = new URLSearchParams(window.location.search);
+
+if (params.get("checkout") === "success") {
+
+  showToast("🎉 You're now Pro!");
+
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+}
 
     await checkRealProStatus();
 
