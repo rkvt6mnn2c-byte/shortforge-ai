@@ -634,11 +634,11 @@ function requirePro(featureName = "This feature") {
   showToast(`${featureName} is a Pro feature`);
 
   const wantsUpgrade = confirm(
-    `${featureName} is included with ShortForge Pro.\n\nPro unlocks:\n- Unlimited generations\n- Premium creator tools\n- Advanced dashboards\n- Future AI image tools\n\nStripe checkout coming soon.`
+    `${featureName} is included with ShortForge Pro.\n\nPro unlocks:\n- Unlimited generations\n- Premium creator tools\n- Advanced dashboards\n- Future AI image tools\n\nClick OK to upgrade now.`
   );
 
   if (wantsUpgrade) {
-    showUpgradeMessage();
+    window.location.href = "/pricing.html";
   }
 
   return false;
