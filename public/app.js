@@ -302,6 +302,8 @@ window.updateAuthUI = async () => {
 const profile = await response.json();
 
 realProStatus = profile.is_pro === true;
+window.stripeCustomerId =
+  profile.stripe_customer_id || null;
 currentUsage = profile.usage_count || 0;
 
 updateUsageUI();
@@ -747,6 +749,41 @@ window.toggleTheme = () => {
   applyTheme();
 
   showToast(`Theme changed to ${currentTheme}`);
+};
+window.manageSubscription = async () => {
+
+  if (!window.stripeCustomerId) {
+    showToast("No subscription found");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "/create-customer-portal-session",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          customerId: window.stripeCustomerId
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.url) {
+      showToast(data.error || "Portal failed");
+      return;
+    }
+
+    window.location.href = data.url;
+
+  } catch (error) {
+    console.error(error);
+    showToast("Subscription error");
+  }
 };
 window.showUpgradeMessage = () => {
 

@@ -204,7 +204,7 @@ app.get("/me", async (req, res) => {
     const { data: profile, error } =
       await supabaseAdmin
         .from("profiles")
-        .select("usage_count, usage_limit, is_pro")
+        .select("usage_count, usage_limit, is_pro, stripe_customer_id")
         .eq("id", user.id)
         .single();
 
@@ -1231,8 +1231,9 @@ if (userId) {
       await supabaseAdmin
         .from("profiles")
         .update({
-          is_pro: true
-        })
+  is_pro: true,
+  stripe_customer_id: session.customer
+})
         .eq("id", userId);
 
       console.log(`Checkout success upgraded user ${userId} to Pro`);
@@ -1243,6 +1244,34 @@ if (userId) {
   } catch (error) {
     console.error("CHECKOUT SUCCESS ERROR:", error);
     res.redirect("/dashboard.html?checkout=error");
+  }
+});
+app.post("/create-customer-portal-session", async (req, res) => {
+  try {
+    const { customerId } = req.body;
+
+    if (!customerId) {
+      return res.status(400).json({
+        error: "Missing customer ID"
+      });
+    }
+
+    const portalSession =
+      await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${req.headers.origin}/dashboard.html`
+      });
+
+    res.json({
+      url: portalSession.url
+    });
+
+  } catch (error) {
+    console.error("CUSTOMER PORTAL ERROR:", error);
+
+    res.status(500).json({
+      error: "Customer portal failed"
+    });
   }
 });
 app.post("/generate-image", async (req, res) => {
