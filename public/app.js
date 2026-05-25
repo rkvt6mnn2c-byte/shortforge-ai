@@ -304,6 +304,13 @@ const profile = await response.json();
 realProStatus = profile.is_pro === true;
 window.stripeCustomerId =
   profile.stripe_customer_id || null;
+  const planLabel =
+  document.getElementById("planLabel");
+
+if (planLabel) {
+  planLabel.textContent =
+    realProStatus ? "PRO" : "Free";
+}
 currentUsage = profile.usage_count || 0;
 
 updateUsageUI();
