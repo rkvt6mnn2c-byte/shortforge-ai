@@ -1158,6 +1158,7 @@ Make it natural, high-retention, dramatic when needed, and ready for TikTok, You
 });
 app.post("/create-checkout-session", async (req, res) => {
   try {
+console.log("CHECKOUT BODY:", req.body);
 
     const session = await stripe.checkout.sessions.create({
 
@@ -1197,7 +1198,7 @@ metadata: {
         `${req.headers.origin}/pricing.html`
 
     });
-
+console.log("CHECKOUT SESSION CREATED:", session.id);
     res.json({
       url: session.url
     });
