@@ -1273,24 +1273,23 @@ app.post("/create-customer-portal-session", async (req, res) => {
       });
     }
 
-    const portalSession =
-      await stripe.billingPortal.sessions.create({
-        customer: customerId,
-        return_url: `${req.headers.origin}/dashboard.html`
-      });
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: "https://shortforgeai.com/dashboard.html"
+    });
 
-    res.json({
+    return res.json({
       url: portalSession.url
     });
 
   } catch (error) {
-    console.error("CUSTOMER PORTAL ERROR:", error);
-
-    res.status(500).json({
-      error: "Customer portal failed"
+    console.error("Stripe portal error:", error);
+    return res.status(500).json({
+      error: error.message
     });
   }
 });
+
 app.post("/generate-image", async (req, res) => {
   try {
     const { prompt } = req.body;
