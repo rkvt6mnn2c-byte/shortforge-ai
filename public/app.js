@@ -666,7 +666,6 @@ function requirePro(featureName = "This feature") {
 function getGenerationLimit() {
   return isProUser() ? PRO_LIMIT : FREE_LIMIT;
 }
-let currentUsage = 0;
 function getUsageCount() {
   return currentUsage || 0;
 }
