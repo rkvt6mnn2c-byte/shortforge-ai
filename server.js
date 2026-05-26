@@ -14,6 +14,7 @@ const supabaseAdmin = createClient(
 );
 
 const app = express();
+app.use(express.static(path.join(__dirname, "public")));
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
@@ -105,16 +106,6 @@ if (
   }
 );
 
-app.use((req, res, next) => {
-
-  if (req.originalUrl === "/stripe-webhook") {
-    next();
-  } else {
-    express.json()(req, res, next);
-  }
-
-});
-
 const requestCounts = new Map();
 
 function rateLimit(req, res, next) {
@@ -151,7 +142,7 @@ function rateLimit(req, res, next) {
 
 app.use(rateLimit);
 // THIS FIXES Cannot GET /dashboard.html
-app.use(express.static(path.join(__dirname, "public")));
+
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -193,11 +184,11 @@ IMPORTANT RULES:
 
 // redirects
 app.get("/", (req, res) => {
-  res.redirect("/dashboard.html");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.get("/dashboard", (req, res) => {
-  res.redirect("/dashboard.html");
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
 app.get("/home", (req, res) => {
@@ -1257,6 +1248,7 @@ if (userId) {
         .from("profiles")
         .update({
   is_pro: true,
+updated_at: new Date().toISOString(),
   stripe_customer_id: session.customer
 })
         .eq("id", userId);

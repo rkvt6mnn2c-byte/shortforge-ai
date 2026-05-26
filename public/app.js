@@ -1,21 +1,21 @@
+import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL =
   "https://swrzmuqnidomnpqxvjoj.supabase.co";
 
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3cnptdXFuaWRvbW5wcXh2am9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MjAzMzUsImV4cCI6MjA5NDk5NjMzNX0.Cr9csw8f6eHwuVttve30tUbsuC0VMrmV6isZLDIyGmM";
 
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
+const supabaseClient = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
     }
-  );
+  }
+);
 const FREE_LIMIT = 25;
 const PRO_LIMIT = 999999;
 
@@ -324,14 +324,11 @@ updateUsageUI();
 supabaseClient.auth.onAuthStateChange((event, session) => {
   console.log("AUTH EVENT:", event);
 
-  setTimeout(async () => {
-    await window.updateAuthUI();
-    updateUsageUI();
-
-    if (typeof loadScripts === "function") {
-      await loadScripts();
-    }
-  }, 0);
+  (async () => {
+  await window.updateAuthUI();
+  updateUsageUI();
+  await loadScripts?.();
+})();
 });
 function showToast(message) {
   const toast = document.getElementById("toast");
@@ -595,7 +592,6 @@ window.deleteCompetitor = (id) => {
   showToast("Competitor deleted");
   renderCompetitors();
 };
-let realProStatus = false;
 
 function isProUser() {
   return realProStatus === true;
@@ -652,6 +648,7 @@ function getUsageCount() {
 }
 
 function incrementUsage() {
+  currentUsage++;
   updateUsageUI();
 }
 function updateDashboardStats() {
@@ -1114,10 +1111,12 @@ window.generate = async () => {
     output.innerHTML = formatOutput(lastGenerated);
 
     realProStatus = data.is_pro === true;
+    localStorage.setItem("shortforge_pro", realProStatus ? "true" : "false");
     currentUsage = data.usage_count || 0;
 
-    updateUsageUI();
-    updateDashboardStats();
+    incrementUsage();
+updateUsageUI();
+updateDashboardStats();
 
     showToast("Generated!");
 
@@ -2384,45 +2383,37 @@ window.copySavedScript = async (id) => {
 };
 
 window.deleteScript = async (id) => {
-
-  const {
-    data: { session }
-  } = await supabaseClient.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (session?.user) {
-
-    const { error } =
-      await supabaseClient
-        .from("scripts")
-        .delete()
-        .eq("id", id);
+    const { error } = await supabaseClient
+      .from("scripts")
+      .delete()
+      .eq("id", id);
 
     if (error) {
       console.error(error);
-      showToast("Cloud delete failed");
+      showToast("Delete failed");
       return;
     }
 
-  } else {
-
-    const key =
-      `sf_saved_scripts_${currentWorkspaceId}`;
-
-    const scripts =
-      savedScriptsCache.filter(
-        s => s.id !== id
-      );
-
-    localStorage.setItem(
-      key,
-      JSON.stringify(scripts)
-    );
+    showToast("Deleted");
+    await loadScripts();
+    return;
   }
 
-  showToast("Deleted");
+  // LOCAL STORAGE fallback
+  const key = `sf_saved_scripts_${currentWorkspaceId}`;
+
+  let scripts = JSON.parse(localStorage.getItem(key) || "[]");
+
+  scripts = scripts.filter(script => script.id !== id);
+
+  localStorage.setItem(key, JSON.stringify(scripts));
+
+  showToast("Deleted locally");
   loadScripts();
 };
-
 
 window.renderAnalyticsCharts = () => {
 
