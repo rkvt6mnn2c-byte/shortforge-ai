@@ -1264,11 +1264,11 @@ updated_at: new Date().toISOString(),
   }
 });
 app.post("/create-customer-portal-session", async (req, res) => {
-  console.log("CUSTOMER ID RECEIVED:", customerId);
     try {
     const { customerId } = req.body;
-    console.log("PORTAL REQUEST BODY:", req.body);
-console.log("CUSTOMER ID:", req.body?.customerId);
+
+console.log("PORTAL REQUEST BODY:", req.body);
+console.log("CUSTOMER ID RECEIVED:", customerId);
 
     if (!customerId) {
       return res.status(400).json({
@@ -1284,7 +1284,8 @@ console.log("CUSTOMER ID:", req.body?.customerId);
     return res.json({
       url: portalSession.url
     });
-
+console.log("REQ BODY:", req.body);
+console.log("CUSTOMER ID:", customerId);
   } catch (error) {
     console.error("Stripe portal error:", error);
     return res.status(500).json({
