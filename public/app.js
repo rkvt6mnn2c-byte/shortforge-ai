@@ -16,6 +16,10 @@ const supabaseClient = createClient(
     }
   }
 );
+supabaseClient.auth.getSession().then(() => {
+  window.updateAuthUI();
+  checkRealProStatus();
+});
 const FREE_LIMIT = 25;
 const PRO_LIMIT = 999999;
 
@@ -234,7 +238,11 @@ window.signIn = async () => {
   }
 
   showToast("Logged in!");
-  await window.updateAuthUI();
+
+// force session refresh before UI update
+await supabaseClient.auth.getSession();
+await window.updateAuthUI();
+await checkRealProStatus();
 };
 
 window.doLogin = window.signIn;
@@ -276,6 +284,9 @@ window.updateAuthUI = async () => {
     if (logoutBtn) logoutBtn.style.display = "none";
 
     updateUsageUI();
+    renderSavedScripts?.();
+renderAnalyticsCharts?.();
+renderWorkspaces?.();
     return;
   }
 
@@ -294,11 +305,18 @@ window.updateAuthUI = async () => {
   });
 
   if (!response.ok) {
-    realProStatus = false;
-    currentUsage = 0;
-    updateUsageUI();
-    return;
-  }
+  console.warn("Profile fetch failed — using Supabase fallback");
+
+  const { data } = await supabaseClient.auth.getUser();
+
+  realProStatus = false;
+  currentUsage = 0;
+
+  window.stripeCustomerId = null;
+
+  updateUsageUI();
+  return;
+}
 const profile = await response.json();
 
 realProStatus = profile.is_pro === true;
@@ -3184,6 +3202,9 @@ window.addEventListener("load", async () => {
   try {
 
     realProStatus = false;
+    await supabaseClient.auth.getSession();
+await window.updateAuthUI();
+await checkRealProStatus();
 
     await window.updateAuthUI();
     const params = new URLSearchParams(window.location.search);
