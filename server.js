@@ -1267,6 +1267,8 @@ app.post("/create-customer-portal-session", async (req, res) => {
   console.log("CUSTOMER ID RECEIVED:", customerId);
     try {
     const { customerId } = req.body;
+    console.log("PORTAL REQUEST BODY:", req.body);
+console.log("CUSTOMER ID:", req.body?.customerId);
 
     if (!customerId) {
       return res.status(400).json({
