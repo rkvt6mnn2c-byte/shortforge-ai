@@ -117,7 +117,7 @@ function rateLimit(req, res, next) {
 
   const now = Date.now();
   const windowMs = 60 * 1000;
-  const maxRequests = 20;
+  const maxRequests = 500;
 
   const current = requestCounts.get(ip) || {
     count: 0,
@@ -141,7 +141,6 @@ function rateLimit(req, res, next) {
   next();
 }
 
-app.use(rateLimit);
 // THIS FIXES Cannot GET /dashboard.html
 
 
