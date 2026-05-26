@@ -4,6 +4,8 @@ const SUPABASE_URL =
 
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3cnptdXFuaWRvbW5wcXh2am9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MjAzMzUsImV4cCI6MjA5NDk5NjMzNX0.Cr9csw8f6eHwuVttve30tUbsuC0VMrmV6isZLDIyGmM";
+let realProStatus = false;
+let currentUsage = 0;
 
 const supabaseClient = createClient(
   SUPABASE_URL,
