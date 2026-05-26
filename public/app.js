@@ -344,11 +344,15 @@ updateUsageUI();
 supabaseClient.auth.onAuthStateChange((event, session) => {
   console.log("AUTH EVENT:", event);
 
-  (async () => {
-  await window.updateAuthUI();
-  updateUsageUI();
-  await loadScripts?.();
-})();
+  setTimeout(async () => {
+    await window.updateAuthUI();
+    await checkRealProStatus();
+    updateUsageUI();
+
+    if (typeof loadScripts === "function") {
+      await loadScripts();
+    }
+  }, 0);
 });
 function showToast(message) {
   const toast = document.getElementById("toast");
