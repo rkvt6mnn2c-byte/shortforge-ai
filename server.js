@@ -1265,7 +1265,8 @@ updated_at: new Date().toISOString(),
   }
 });
 app.post("/create-customer-portal-session", async (req, res) => {
-  try {
+  console.log("CUSTOMER ID RECEIVED:", customerId);
+    try {
     const { customerId } = req.body;
 
     if (!customerId) {
